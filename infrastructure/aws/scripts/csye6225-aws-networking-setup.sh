@@ -89,7 +89,7 @@ SUBNET3_PUBLIC_ID=$(aws ec2 create-subnet \
 echo "  Subnet ID '$SUBNET3_PUBLIC_ID' CREATED in '$SUBNET3_PUBLIC_AZ'" \
   "Availability Zone."
 
-# Add Name tag to Public Subnet 2
+# Add Name tag to Public Subnet 3
 aws ec2 create-tags \
   --resources $SUBNET3_PUBLIC_ID \
   --tags "Key=Name,Value=$SUBNET3_PUBLIC_NAME" \
@@ -112,3 +112,21 @@ aws ec2 attach-internet-gateway \
   --internet-gateway-id $IGW_ID \
   --region $AWS_REGION
 echo "  Internet Gateway ID '$IGW_ID' ATTACHED to VPC ID '$VPC_ID'."
+
+# Create Route Table
+echo "Creating Route Table..."
+ROUTE_TABLE_ID=$(aws ec2 create-route-table \
+  --vpc-id $VPC_ID \
+  --query 'RouteTable.{RouteTableId:RouteTableId}' \
+  --output text \
+  --region $AWS_REGION)
+echo "  Route Table ID '$ROUTE_TABLE_ID' CREATED."
+
+# Create route to Internet Gateway
+RESULT=$(aws ec2 create-route \
+  --route-table-id $ROUTE_TABLE_ID \
+  --destination-cidr-block 0.0.0.0/0 \
+  --gateway-id $IGW_ID \
+  --region $AWS_REGION)
+echo "  Route to '0.0.0.0/0' via Internet Gateway ID '$IGW_ID' ADDED to" \
+  "Route Table ID '$ROUTE_TABLE_ID'."
