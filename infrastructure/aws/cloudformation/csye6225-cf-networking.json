@@ -1,0 +1,29 @@
+
+{
+
+    "Description" : "Networking Stack",
+    "AWSTemplateFormatVersion" : "2010-09-09",
+    "Parameters" : {
+      "stackname" : {
+        "Description" : "Stack Name",
+        "Type" : "String",
+        "Default" : "stack01"
+      }
+
+    },
+
+
+    "Resources" : {
+
+        "vpc1" : {
+          "Type" : "AWS::EC2::VPC",
+          "Properties" : {
+            "CidrBlock" : "10.0.0.0/16",
+            "EnableDnsSupport" : true,
+            "EnableDnsHostnames" : true,
+            "InstanceTenancy" : "default",
+            "Tags" : [{"Key" : "Name", "Value" : {"Fn::Join" : ["",[{"Ref" : "stackname"},"-csye6225-vpc"]] }}]
+          }
+        }        
+    }
+}
