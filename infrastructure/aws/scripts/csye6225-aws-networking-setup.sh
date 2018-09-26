@@ -9,7 +9,7 @@ SUBNET2_PUBLIC_AZ="us-east-1a"
 SUBNET2_PUBLIC_NAME="SUBNET_2 - 10.0.5.0 - us-east-1b"
 SUBNET3_PUBLIC_CIDR="10.0.6.0/24"
 SUBNET3_PUBLIC_AZ="us-east-1a"
-SUBNET3_PUBLIC_NAME="SUBNET_2 - 10.0.6.0 - us-east-1c"
+SUBNET3_PUBLIC_NAME="SUBNET_3 - 10.0.6.0 - us-east-1c"
 CHECK_FREQUENCY=5
 #
 #==============================================================================
