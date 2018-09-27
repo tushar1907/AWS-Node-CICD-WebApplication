@@ -208,3 +208,28 @@ RESULT=$(aws ec2 create-route \
   --region $AWS_REGION)
 echo "  Route to '0.0.0.0/0' via Internet Gateway ID '$IGW_ID' ADDED to" \
   "Route Table ID '$ROUTE_TABLE_ID'."
+
+# Associate Public Subnet 1 with Route Table
+RESULT=$(aws ec2 associate-route-table  \
+  --subnet-id $SUBNET1_PUBLIC_ID \
+  --route-table-id $ROUTE_TABLE_ID \
+  --region $AWS_REGION)
+echo "  Public Subnet ID 1 '$SUBNET1_PUBLIC_ID' ASSOCIATED with Route Table ID" \
+  "'$ROUTE_TABLE_ID'."
+
+  # Associate Public Subnet 2 with Route Table
+RESULT=$(aws ec2 associate-route-table  \
+  --subnet-id $SUBNET2_PUBLIC_ID \
+  --route-table-id $ROUTE_TABLE_ID \
+  --region $AWS_REGION)
+echo "  Public Subnet ID 2 '$SUBNET2_PUBLIC_ID' ASSOCIATED with Route Table ID" \
+  "'$ROUTE_TABLE_ID'."
+
+  # Associate Public Subnet 3 with Route Table
+RESULT=$(aws ec2 associate-route-table  \
+  --subnet-id $SUBNET3_PUBLIC_ID \
+  --route-table-id $ROUTE_TABLE_ID \
+  --region $AWS_REGION)
+echo "  Public Subnet ID 3 '$SUBNET3_PUBLIC_ID' ASSOCIATED with Route Table ID" \
+  "'$ROUTE_TABLE_ID'."
+
