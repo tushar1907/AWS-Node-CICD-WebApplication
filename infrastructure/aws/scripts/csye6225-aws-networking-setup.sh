@@ -64,8 +64,7 @@ aws ec2 create-tags \
   --tags "Key=Name,Value=$VPC_NAME" \
   --region $AWS_REGION
 if [ "$?" = "0" ]; then
-    echo "  VPC ID '$VPC_ID' NAMED as '$VPC_NAME'."
-    echo "VPCID=$VPC_ID">>"ID.txt"
+    echo "  VPC ID '$VPC_ID' NAMED as '$VPC_NAME'."    
 else
    error_exit "Add Name tag to VPC  Failed!  Aborting"
 fi
@@ -81,8 +80,8 @@ SUBNET1_PUBLIC_ID=$(aws ec2 create-subnet \
   --region $AWS_REGION)
 if [ "$?" = "0" ]; then
      echo "  Subnet ID '$SUBNET1_PUBLIC_ID' CREATED in '$SUBNET1_PUBLIC_AZ'" \
-  "Availability Zone."
-    echo "VPCID=$VPC_ID">>"ID.txt"
+  "Availability Zone."    
+  echo "SUBNET1_PUBLIC_ID=$SUBNET1_PUBLIC_ID">>"ID.txt"
 else
    error_exit "Create Public Subnet 1 Failed!  Aborting"
 fi
@@ -96,7 +95,7 @@ aws ec2 create-tags \
 
 if [ "$?" = "0" ]; then
     echo "  Subnet ID '$SUBNET1_PUBLIC_ID' NAMED as" \
-         "'$SUBNET1_PUBLIC_NAME'."
+         "'$SUBNET1_PUBLIC_NAME'."    
 else
    error_exit "Add Name tag to Public Subnet 1 Failed!  Aborting"
 fi

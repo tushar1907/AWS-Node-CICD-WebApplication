@@ -26,7 +26,7 @@ else
     error_exit "Unable to delete Subnet ID ${SUBNET3_PUBLIC_ID}. Please input correct Public Subnet Id!"
 fi
 #Deleting Private Subnet 1    
-if aws ec2 delete-subnet --subnet-id $SUBNET1_PRIVATE_ID; then
+if aws ec2 delete-subnet --subnet-id $SUBNET1_PRIVATE_ID; then  
     echo " Private Subnet 1 ${SUBNET1_PRIVATE_ID} has been deleted!!"
 else
     error_exit "Unable to delete Subnet ID ${SUBNET1_PRIVATE_ID}. Please input correct Private Subnet Id!"
