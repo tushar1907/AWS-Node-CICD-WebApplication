@@ -24,6 +24,62 @@
             "InstanceTenancy" : "default",
             "Tags" : [{"Key" : "Name", "Value" : {"Fn::Join" : ["",[{"Ref" : "stackname"},"-csye6225-vpc"]] }}]
           }
-        }        
+        },
+        "subnet1" : {
+          "Type" : "AWS::EC2::Subnet",
+          "Properties" : {
+             "VpcId" : { "Ref" : "vpc1" },
+             "CidrBlock" : "10.0.1.0/24",
+             "AvailabilityZone" : "us-east-1a",
+             "Tags" : [ { "Key" : "Name", "Value" : "Subnet-Public-1" } ]
+        }},
+        "subnet2" : {
+          "Type" : "AWS::EC2::Subnet",
+          "Properties" : {
+             "VpcId" : { "Ref" : "vpc1" },
+             "CidrBlock" : "10.0.2.0/24",
+             "AvailabilityZone" : "us-east-1b",
+             "Tags" : [ { "Key" : "Name", "Value" : "Subnet-Public-2" } ]
+          }
+       },
+       "subnet3" : {
+        "Type" : "AWS::EC2::Subnet",
+        "Properties" : {
+           "VpcId" : { "Ref" : "vpc1" },
+           "CidrBlock" : "10.0.3.0/24",
+           "AvailabilityZone" : "us-east-1c",
+           "Tags" : [ { "Key" : "Name", "Value" : "Subnet-Public- 2" } ]
+        }
+     },
+      "myInternetGateway" : {
+        "Type" : "AWS::EC2::InternetGateway",
+        "Properties" : {
+           "Tags" : [ {"Key" : "Name", "Value" : {"Fn::Join" : ["",[{"Ref" : "stackname"},"-csye6225-InternetGateway"]]}}]
+        }
+     },
+     "AttachGateway" : {
+      "Type" : "AWS::EC2::VPCGatewayAttachment",
+      "Properties" : {
+         "VpcId" : { "Ref" : "vpc1" },
+         "InternetGatewayId" : { "Ref" : "myInternetGateway" }
+      }
+      },
+      "myRouteTable" : {
+        "Type" : "AWS::EC2::RouteTable",
+        "Properties" : {
+           "VpcId" : { "Ref" : "vpc1" },
+           "Tags" : [ { "Key" : "Name", "Value" : {"Fn::Join" : ["",[{"Ref" : "stackname"},"-csye6225-route-table"]]} } ]
+        }
+     },
+     "myRoute" : {
+      "Type" : "AWS::EC2::Route",
+      "Properties" : {
+         "RouteTableId" : { "Ref" : "myRouteTable" },
+         "DestinationCidrBlock" : "0.0.0.0/0",
+         "GatewayId" : { "Ref" : "myInternetGateway" }
+        }
+      }
+
+
     }
-}
+  }
