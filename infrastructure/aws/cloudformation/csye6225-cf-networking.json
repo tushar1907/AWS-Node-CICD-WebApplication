@@ -25,7 +25,7 @@
             "Tags" : [{"Key" : "Name", "Value" : {"Fn::Join" : ["",[{"Ref" : "stackname"},"-csye6225-vpc"]] }}]
           }
         },
-        "subnet1" : {
+        "subnetPublic1" : {
           "Type" : "AWS::EC2::Subnet",
           "Properties" : {
              "VpcId" : { "Ref" : "vpc1" },
@@ -33,30 +33,52 @@
              "AvailabilityZone" : "us-east-1a",
              "Tags" : [ { "Key" : "Name", "Value" : "Subnet-Public-1" } ]
         }},
-        "subnet2" : {
+        "subnetPrivate1" : {
           "Type" : "AWS::EC2::Subnet",
           "Properties" : {
              "VpcId" : { "Ref" : "vpc1" },
              "CidrBlock" : "10.0.2.0/24",
+             "AvailabilityZone" : "us-east-1a",
+             "Tags" : [ { "Key" : "Name", "Value" : "Subnet-Private-1" } ]
+        }},
+        "subnetPublic2" : {
+          "Type" : "AWS::EC2::Subnet",
+          "Properties" : {
+             "VpcId" : { "Ref" : "vpc1" },
+             "CidrBlock" : "10.0.3.0/24",
              "AvailabilityZone" : "us-east-1b",
              "Tags" : [ { "Key" : "Name", "Value" : "Subnet-Public-2" } ]
-          }
-       },
-       "subnet3" : {
-        "Type" : "AWS::EC2::Subnet",
-        "Properties" : {
-           "VpcId" : { "Ref" : "vpc1" },
-           "CidrBlock" : "10.0.3.0/24",
-           "AvailabilityZone" : "us-east-1c",
-           "Tags" : [ { "Key" : "Name", "Value" : "Subnet-Public- 2" } ]
-        }
-     },
-      "myInternetGateway" : {
-        "Type" : "AWS::EC2::InternetGateway",
-        "Properties" : {
+        }},
+        "subnetPrivate2" : {
+          "Type" : "AWS::EC2::Subnet",
+          "Properties" : {
+             "VpcId" : { "Ref" : "vpc1" },
+             "CidrBlock" : "10.0.4.0/24",
+             "AvailabilityZone" : "us-east-1b",
+             "Tags" : [ { "Key" : "Name", "Value" : "Subnet-Private-2" } ]
+        }},
+        "subnetPublic3" : {
+          "Type" : "AWS::EC2::Subnet",
+          "Properties" : {
+             "VpcId" : { "Ref" : "vpc1" },
+             "CidrBlock" : "10.0.5.0/24",
+             "AvailabilityZone" : "us-east-1c",
+             "Tags" : [ { "Key" : "Name", "Value" : "Subnet-Public-3" } ]
+        }},
+        "subnetPrivate3" : {
+          "Type" : "AWS::EC2::Subnet",
+          "Properties" : {
+             "VpcId" : { "Ref" : "vpc1" },
+             "CidrBlock" : "10.0.6.0/24",
+             "AvailabilityZone" : "us-east-1c",
+             "Tags" : [ { "Key" : "Name", "Value" : "Subnet-Private-3" } ]
+        }},
+        "myInternetGateway" : {
+          "Type" : "AWS::EC2::InternetGateway",
+          "Properties" : {
            "Tags" : [ {"Key" : "Name", "Value" : {"Fn::Join" : ["",[{"Ref" : "stackname"},"-csye6225-InternetGateway"]]}}]
-        }
-     },
+          }
+        },
      "AttachGateway" : {
       "Type" : "AWS::EC2::VPCGatewayAttachment",
       "Properties" : {
@@ -78,8 +100,27 @@
          "DestinationCidrBlock" : "0.0.0.0/0",
          "GatewayId" : { "Ref" : "myInternetGateway" }
         }
-      }
-
-
+      },
+      "mySubnet1RouteTableAssociation" : {
+        "Type" : "AWS::EC2::SubnetRouteTableAssociation",
+        "Properties" : {
+           "SubnetId" : { "Ref" : "subnetPublic1" },
+           "RouteTableId" : { "Ref" : "myRouteTable" }
+        }
+     },
+     "mySubnet2RouteTableAssociation" : {
+      "Type" : "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties" : {
+         "SubnetId" : { "Ref" : "subnetPublic2" },
+         "RouteTableId" : { "Ref" : "myRouteTable" }
+        }
+      },
+      "mySubnet3RouteTableAssociation" : {
+        "Type" : "AWS::EC2::SubnetRouteTableAssociation",
+        "Properties" : {
+           "SubnetId" : { "Ref" : "subnetPublic3" },
+           "RouteTableId" : { "Ref" : "myRouteTable" }
+        }
+     }
     }
   }
