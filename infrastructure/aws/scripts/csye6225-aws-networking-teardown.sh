@@ -1,5 +1,7 @@
 vpcid=$(<ID.txt)
-# aws ec2 delete-vpc --all-dependencies --vpc-id $ID vpc-deadbeef
+
+# Delete route table 
+for i in `aws ec2 describe-route-tables --filters Name=vpc-id,Values="${vpcid}" | grep rtb- | sed -E 's/^.(rtb-[a-z0-9]+).$/\1/'`; do aws ec2 delete-route-table --route-table-id=$i; done
 
 # Delete route table 
 for i in `aws ec2 describe-route-tables --filters Name=vpc-id,Values="${vpcid}" | grep rtb- | sed -E 's/^.*(rtb-[a-z0-9]+).*$/\1/'`; do aws ec2 delete-route-table --route-table-id=$i; done
