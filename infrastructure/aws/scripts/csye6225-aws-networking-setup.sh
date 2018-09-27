@@ -1,15 +1,32 @@
 AWS_REGION="us-east-1"
 VPC_NAME="Assignment-1-CLI"
 VPC_CIDR="10.0.0.0/16"
-SUBNET1_PUBLIC_CIDR="10.0.4.0/24"
+
+SUBNET1_PUBLIC_CIDR="10.0.1.0/24"
 SUBNET1_PUBLIC_AZ="us-east-1a"
-SUBNET1_PUBLIC_NAME="SUBNET_1 - 10.0.4.0 - us-east-1a"
-SUBNET2_PUBLIC_CIDR="10.0.5.0/24"
-SUBNET2_PUBLIC_AZ="us-east-1a"
-SUBNET2_PUBLIC_NAME="SUBNET_2 - 10.0.5.0 - us-east-1b"
-SUBNET3_PUBLIC_CIDR="10.0.6.0/24"
-SUBNET3_PUBLIC_AZ="us-east-1a"
-SUBNET3_PUBLIC_NAME="SUBNET_2 - 10.0.6.0 - us-east-1c"
+SUBNET1_PUBLIC_NAME="SUBNET_1_PUB - 10.0.1.0 - us-east-1a"
+SUBNET1_PRIVATE_CIDR="10.0.2.0/24"
+SUBNET1_PRIVATE_AZ="us-east-1a"
+SUBNET1_PRIVATE_NAME="SUBNET_1_PRV - 10.0.2.0 - us-east-1a"
+
+
+SUBNET2_PUBLIC_CIDR="10.0.3.0/24"
+SUBNET2_PUBLIC_AZ="us-east-1b"
+SUBNET2_PUBLIC_NAME="SUBNET_2_PUB - 10.0.3.0 - us-east-1b"
+SUBNET2_PRIVATE_CIDR="10.0.4.0/24"
+SUBNET2_PRIVATE_AZ="us-east-1b"
+SUBNET2_PRIVATE_NAME="SUBNET_2_PRV - 10.0.4.0 - us-east-1b"
+
+
+SUBNET3_PUBLIC_CIDR="10.0.5.0/24"
+SUBNET3_PUBLIC_AZ="us-east-1c"
+SUBNET3_PUBLIC_NAME="SUBNET_3_PUB - 10.0.5.0 - us-east-1c"
+SUBNET3_PRIVATE_CIDR="10.0.6.0/24"
+SUBNET3_PRIVATE_AZ="us-east-1c"
+SUBNET3_PRIVATE_NAME="SUBNET_3_PRV - 10.0.6.0 - us-east-1c"
+
+
+
 CHECK_FREQUENCY=5
 #
 #==============================================================================
@@ -24,7 +41,7 @@ VPC_ID=$(aws ec2 create-vpc \
   --output text \
   --region $AWS_REGION)
 echo "  VPC ID '$VPC_ID' CREATED in '$AWS_REGION' region."
-
+echo "$VPC_ID">"ID.txt"
 # Add Name tag to VPC
 aws ec2 create-tags \
   --resources $VPC_ID \
@@ -52,6 +69,27 @@ aws ec2 create-tags \
 echo "  Subnet ID '$SUBNET1_PUBLIC_ID' NAMED as" \
   "'$SUBNET1_PUBLIC_NAME'."
 
+# Create Private Subnet
+echo "Creating Private Subnet..."
+SUBNET1_PRIVATE_ID=$(aws ec2 create-subnet \
+  --vpc-id $VPC_ID \
+  --cidr-block $SUBNET1_PRIVATE_CIDR \
+  --availability-zone $SUBNET1_PRIVATE_AZ \
+  --query 'Subnet.{SubnetId:SubnetId}' \
+  --output text \
+  --region $AWS_REGION)
+echo "  Subnet ID '$SUBNET1_PRIVATE_ID' CREATED in '$SUBNET1_PRIVATE_AZ'" \
+  "Availability Zone."
+
+# Add Name tag to Private Subnet
+aws ec2 create-tags \
+  --resources $SUBNET1_PRIVATE_ID \
+  --tags "Key=Name,Value=$SUBNET1_PRIVATE_NAME" \
+  --region $AWS_REGION
+echo "  Subnet ID '$SUBNET1_PRIVATE_ID' NAMED as '$SUBNET1_PRIVATE_NAME'."
+
+
+#------------------------------------------------------
 
 
   # Create Public Subnet 2
@@ -74,7 +112,27 @@ aws ec2 create-tags \
 echo "  Subnet ID '$SUBNET2_PUBLIC_ID' NAMED as" \
   "'$SUBNET2_PUBLIC_NAME'."
 
+# Create Private Subnet 2
+echo "Creating Private Subnet..."
+SUBNET2_PRIVATE_ID=$(aws ec2 create-subnet \
+  --vpc-id $VPC_ID \
+  --cidr-block $SUBNET2_PRIVATE_CIDR \
+  --availability-zone $SUBNET2_PRIVATE_AZ \
+  --query 'Subnet.{SubnetId:SubnetId}' \
+  --output text \
+  --region $AWS_REGION)
+echo "  Subnet ID '$SUBNET2_PRIVATE_ID' CREATED in '$SUBNET2_PRIVATE_AZ'" \
+  "Availability Zone."
 
+# Add Name tag to Private Subnet 2
+aws ec2 create-tags \
+  --resources $SUBNET2_PRIVATE_ID \
+  --tags "Key=Name,Value=$SUBNET2_PRIVATE_NAME" \
+  --region $AWS_REGION
+echo "  Subnet ID '$SUBNET2_PRIVATE_ID' NAMED as '$SUBNET2_PRIVATE_NAME'."
+
+
+#------------------------------------------------------
 
 
 # Create Public Subnet 3
@@ -97,6 +155,26 @@ aws ec2 create-tags \
 echo "  Subnet ID '$SUBNET3_PUBLIC_ID' NAMED as" \
   "'$SUBNET3_PUBLIC_NAME'."
 
+# Create Private Subnet 3
+echo "Creating Private Subnet..."
+SUBNET3_PRIVATE_ID=$(aws ec2 create-subnet \
+  --vpc-id $VPC_ID \
+  --cidr-block $SUBNET3_PRIVATE_CIDR \
+  --availability-zone $SUBNET3_PRIVATE_AZ \
+  --query 'Subnet.{SubnetId:SubnetId}' \
+  --output text \
+  --region $AWS_REGION)
+echo "  Subnet ID '$SUBNET3_PRIVATE_ID' CREATED in '$SUBNET3_PRIVATE_AZ'" \
+  "Availability Zone."
+
+# Add Name tag to Private Subnet 3
+aws ec2 create-tags \
+  --resources $SUBNET3_PRIVATE_ID \
+  --tags "Key=Name,Value=$SUBNET3_PRIVATE_NAME" \
+  --region $AWS_REGION
+echo "  Subnet ID '$SUBNET3_PRIVATE_ID' NAMED as '$SUBNET3_PRIVATE_NAME'."
+
+#---------------------------------------------------------------------------
 
 # Create Internet gateway
 echo "Creating Internet Gateway..."
