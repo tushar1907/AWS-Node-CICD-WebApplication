@@ -1,43 +1,182 @@
 
-    
-   
-    
-   
-   {
-      "Type" : "AWS::EC2::Instance",
+{"Description" : "Application Stack",
+"AWSTemplateFormatVersion" : "2010-09-09",
+"Parameters" : {
+  "stackname" : {
+    "Description" : "Stack Name",
+    "Type" : "String",
+    "Default" : "stack01"
+  }
+
+},
+
+"Resources" : {
+    "vpc1" : {
+        "Type" : "AWS::EC2::VPC",
+        "Properties" : {
+          "CidrBlock" : "10.0.0.0/16",
+          "EnableDnsSupport" : true,
+          "EnableDnsHostnames" : true,
+          "InstanceTenancy" : "default",
+          "Tags" : [{"Key" : "Name", "Value" : {"Fn::Join" : ["",[{"Ref" : "stackname"},"-csye6225-vpc"]] }}]
+        }
+      },
+      "subnetPublic1" : {
+        "Type" : "AWS::EC2::Subnet",
+        "Properties" : {
+           "VpcId" : { "Ref" : "vpc1" },
+           "CidrBlock" : "10.0.1.0/24",
+           "AvailabilityZone" : "us-east-1a",
+           "Tags" : [ { "Key" : "Name", "Value" : "Subnet-Public-1" } ]
+      }},
+      "subnetPrivate1" : {
+        "Type" : "AWS::EC2::Subnet",
+        "Properties" : {
+           "VpcId" : { "Ref" : "vpc1" },
+           "CidrBlock" : "10.0.2.0/24",
+           "AvailabilityZone" : "us-east-1a",
+           "Tags" : [ { "Key" : "Name", "Value" : "Subnet-Private-1" } ]
+      }},
+      "subnetPublic2" : {
+        "Type" : "AWS::EC2::Subnet",
+        "Properties" : {
+           "VpcId" : { "Ref" : "vpc1" },
+           "CidrBlock" : "10.0.3.0/24",
+           "AvailabilityZone" : "us-east-1b",
+           "Tags" : [ { "Key" : "Name", "Value" : "Subnet-Public-2" } ]
+      }},
+      "subnetPrivate2" : {
+        "Type" : "AWS::EC2::Subnet",
+        "Properties" : {
+           "VpcId" : { "Ref" : "vpc1" },
+           "CidrBlock" : "10.0.4.0/24",
+           "AvailabilityZone" : "us-east-1b",
+           "Tags" : [ { "Key" : "Name", "Value" : "Subnet-Private-2" } ]
+      }},
+      "subnetPublic3" : {
+        "Type" : "AWS::EC2::Subnet",
+        "Properties" : {
+           "VpcId" : { "Ref" : "vpc1" },
+           "CidrBlock" : "10.0.5.0/24",
+           "AvailabilityZone" : "us-east-1c",
+           "Tags" : [ { "Key" : "Name", "Value" : "Subnet-Public-3" } ]
+      }},
+      "subnetPrivate3" : {
+        "Type" : "AWS::EC2::Subnet",
+        "Properties" : {
+           "VpcId" : { "Ref" : "vpc1" },
+           "CidrBlock" : "10.0.6.0/24",
+           "AvailabilityZone" : "us-east-1c",
+           "Tags" : [ { "Key" : "Name", "Value" : "Subnet-Private-3" } ]
+      }},
+      "myInternetGateway" : {
+        "Type" : "AWS::EC2::InternetGateway",
+        "Properties" : {
+         "Tags" : [ {"Key" : "Name", "Value" : {"Fn::Join" : ["",[{"Ref" : "stackname"},"-csye6225-InternetGateway"]]}}]
+        }
+      },
+   "AttachGateway" : {
+    "Type" : "AWS::EC2::VPCGatewayAttachment",
+    "Properties" : {
+       "VpcId" : { "Ref" : "vpc1" },
+       "InternetGatewayId" : { "Ref" : "myInternetGateway" }
+    }
+    },
+    "myRouteTable" : {
+      "Type" : "AWS::EC2::RouteTable",
       "Properties" : {
-         "Affinity" : "String",
-         "AvailabilityZone" : String,
-         "BlockDeviceMappings" : [ EC2 Block Device Mapping, ... ],
-         "CreditSpecification" : CreditSpecification,     
-         "DisableApiTermination" : Boolean,
-         "EbsOptimized" : Boolean,
-         "ElasticGpuSpecifications" : [ ElasticGpuSpecification, ... ],
-         "HostId" : String,
-         "IamInstanceProfile" : String,
-         "ImageId" : String,
-         "InstanceInitiatedShutdownBehavior" : String,
-         "InstanceType" : String,
-         "Ipv6AddressCount" : Integer,
-         "Ipv6Addresses" : [ IPv6 Address Type, ... ],
-         "KernelId" : String,
-         "KeyName" : String,
-         "LaunchTemplate" : Amazon EC2  Instance LaunchTemplateSpecification,
-         "Monitoring" : Boolean,
-         "NetworkInterfaces" : [ EC2 Network Interface, ... ],
-         "PlacementGroupName" : String,
-         "PrivateIpAddress" : String,
-         "RamdiskId" : String,
-         "SecurityGroupIds" : [ String, ... ],
-         "SecurityGroups" : [ String, ... ],
-         "SourceDestCheck" : Boolean,
-         "SsmAssociations" : [ SSMAssociation, ... ],
-         "SubnetId" : String,
-         "Tags" : [ Resource Tag, ... ],
-         "Tenancy" : String,
-         "UserData" : String,
-         "Volumes" : [ EC2 MountPoint, ... ],
-         "AdditionalInfo" : String
+         "VpcId" : { "Ref" : "vpc1" },
+         "Tags" : [ { "Key" : "Name", "Value" : {"Fn::Join" : ["",[{"Ref" : "stackname"},"-csye6225-route-table"]]} } ]
+      }
+   },
+   "myRoute" : {
+    "Type" : "AWS::EC2::Route",
+    "Properties" : {
+       "RouteTableId" : { "Ref" : "myRouteTable" },
+       "DestinationCidrBlock" : "0.0.0.0/0",
+       "GatewayId" : { "Ref" : "myInternetGateway" }
+      }
+    },
+    "mySubnet1RouteTableAssociation" : {
+      "Type" : "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties" : {
+         "SubnetId" : { "Ref" : "subnetPublic1" },
+         "RouteTableId" : { "Ref" : "myRouteTable" }
+      }
+   },
+   "mySubnet2RouteTableAssociation" : {
+    "Type" : "AWS::EC2::SubnetRouteTableAssociation",
+    "Properties" : {
+       "SubnetId" : { "Ref" : "subnetPublic2" },
+       "RouteTableId" : { "Ref" : "myRouteTable" }
+      }
+    },
+    "mySubnet3RouteTableAssociation" : {
+      "Type" : "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties" : {
+         "SubnetId" : { "Ref" : "subnetPublic3" },
+         "RouteTableId" : { "Ref" : "myRouteTable" }
+      }
+   },
+    "SG1" : {
+        "Type" : "AWS::EC2::SecurityGroup",
+        "Properties" : {
+           "GroupName" : "csye6225-WebApp",
+           "GroupDescription" : "Security Group for Web App",
+           "VpcId" : {"Ref" : "vpc1"},
+           "SecurityGroupIngress" : [{
+                 "IpProtocol" : "tcp",
+                 "FromPort" : 80,
+                 "ToPort" : 80,
+                 "CidrIp" : "0.0.0.0/0"
+              },{
+              "IpProtocol" : "tcp",
+              "FromPort" : 22,
+              "ToPort" : 22,
+              "CidrIp" : "0.0.0.0/0"
+           },{
+            "IpProtocol" : "tcp",
+            "FromPort" : 443,
+            "ToPort" : 443,
+            "CidrIp" : "0.0.0.0/0"
+         }]
+        }
+     },
+     "SG2" : {
+        "Type" : "AWS::EC2::SecurityGroup",
+        "Properties" : {
+           "GroupName" : "csye6225-rds",
+           "GroupDescription" : "Security Group for Database",
+           "VpcId" : {"Ref" : "vpc1"},
+           "SecurityGroupIngress" : [{
+                 "IpProtocol" : "tcp",
+                 "FromPort" : 3306,
+                 "ToPort" : 3306,
+                 "CidrIp" : "0.0.0.0/0"
+              }]
+        }
+     },
+   
+     "MyEC2Instance" : {
+         "Type" : "AWS::EC2::Instance",
+         "Properties" : {
+            "ImageId" : "ami-9887c6e7",
+            "AvailabilityZone" : "us-east-1a",
+            "KeyName" : "csye6225-ec2key",
+            "InstanceType": "t2.micro",
+            "SecurityGroups":[{"Ref":"SG1"}],
+            
+            "BlockDeviceMappings" : [
+               {
+                  "DeviceName" : "csye6225-ec2",
+                  "Ebs" : {
+                     "VolumeType" : "gp2",
+                     "DeleteOnTermination" : "false",
+                     "VolumeSize" : "20"
+                  }
+               }]
+         }
       }
    }
-        
+       
+}
