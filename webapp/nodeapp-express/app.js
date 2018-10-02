@@ -188,15 +188,17 @@ app.delete('/transaction/:id',(req,res)=>{
 
 });
 
-app.delete('/transaction/:id',(req,res)=>{
-  console.log(req.params.id);
-  let sql2="UPDATE table_name SET column1 = value1, column2 = value2, ...
-  WHERE condition;";
-  let query2=db.query(sql2,(err,result)=>{
+app.put('/transaction/:id',(req,res)=>{  
+  let sql2='UPDATE `transaction` SET `description`=?,`amount`=?,`merchant`=?,`date`=?,`category`=? where `id`=?';
+  let query2=db.query(sql2,
+    [req.body.description,req.body.amount, req.body.merchant,req.body.date,req.body.category, req.params.id]
+    ,(err,result)=>{
     res.send({'error':err,'result':result})
   });
 
 });
+
+
 //Route Files
 let login=require('./routes/login');
 app.use('/login',login);
