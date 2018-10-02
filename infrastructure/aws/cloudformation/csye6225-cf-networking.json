@@ -122,5 +122,16 @@
            "RouteTableId" : { "Ref" : "myRouteTable" }
         }
      }
+    },
+    "Outputs": {
+      "vpcId": {
+        "Description": "The ID of the VPC",
+        "Value": {
+          "Ref": "vpc1"
+        },
+        "Export": {
+          "Name": "csye6225-Networking-vpc"
+        }
+      }
     }
   }

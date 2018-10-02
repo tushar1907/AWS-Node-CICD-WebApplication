@@ -65,7 +65,7 @@
                "KeyName" : "csye6225-ec2key",
                "AvailabilityZone" : "us-east-1a",
                "InstanceType" : "t2.micro",
-               "SecurityGroupsIds" : [ {"Ref" : "SGweb"}],
+               "SecurityGroupIds" : [ {"Ref" : "SGweb"}],
 
 
                "BlockDeviceMappings" : [
