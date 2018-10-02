@@ -11,18 +11,7 @@
 
     },
 
-    "Resources" : {
-
-        "myVPC" : {
-            "Type" : "AWS::EC2::VPC",
-            "Properties" : {
-              "CidrBlock" : "10.0.0.0/16",
-              "EnableDnsSupport" : true,
-              "EnableDnsHostnames" : true,
-              "InstanceTenancy" : "default",
-              "Tags" : [{"Key" : "Name", "Value" : {"Fn::Join" : ["",[{"Ref" : "stackname"},"-csye6225-vpc"]] }}]
-            }
-          },
+    "Resources" : {        
 
         "SGweb" : {
             "Type" : "AWS::EC2::SecurityGroup",
@@ -30,7 +19,7 @@
             "Properties" : {
                "GroupName" : "csye6225-webapp",
                "GroupDescription" : "allow TCP traffic on port 22, 80 and 443",
-               "VpcId" : {"Ref" : "myVPC"},
+               "VpcId" : {"Fn::ImportValue" : "csye6225-Networking-vpc"},
                "SecurityGroupIngress" : [{
                      "IpProtocol" : "tcp",
                      "FromPort" : 80,
@@ -57,7 +46,7 @@
             "Properties" : {
                "GroupName" : "csye6225-rds",
                "GroupDescription" : "allow TCP traffic on port 22, 80 and 443",
-               "VpcId" : {"Ref" : "myVPC"},
+               "VpcId" : {"Fn::ImportValue" : "csye6225-Networking-vpc"},
                "SecurityGroupIngress" : [{
                      "IpProtocol" : "tcp",
                      "FromPort" : 3306,
@@ -76,7 +65,7 @@
                "KeyName" : "csye6225-ec2key",
                "AvailabilityZone" : "us-east-1a",
                "InstanceType" : "t2.micro",
-               "SecurityGroups" : [ {"Ref" : "SGweb"}],
+               "SecurityGroupsIds" : [ {"Ref" : "SGweb"}],
 
 
                "BlockDeviceMappings" : [
@@ -87,9 +76,7 @@
                         "DeleteOnTermination" : "false",
                         "VolumeSize" : "20"
                      }
-                  }
-                  
-               ]
+                  }]
             }
          }
     }
