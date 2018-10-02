@@ -179,21 +179,22 @@ app.post('/transaction',(req,res)=>{
 
 });
 
-app.post('/transaction/:id',(req,res)=>{
+app.delete('/transaction/:id',(req,res)=>{
   console.log(req.params.id);
-  
+  let sql2="DELETE FROM `transaction` WHERE id = 1";
+  let query2=db.query(sql2,(err,result)=>{
+    res.send({'error':err,'result':result})
+  });
 
-  // let description = req.body.description;
-  // let amount = req.body.amount;
-  // let merchant = req.body.merchant;
-  // let date = req.body.date;
-  // let category = req.body.category;
-  // let sql2="insert into `transaction` (`description`,`amount`,`merchant`,`date`,`category`)values('"+description+"','"+amount+"','"+merchant+"','"+date+"','"+category+"')";
-  // let sql3 = sql2 + "values('"+description+"','"+amount+"','"+merchant+"','"+date+"','"+category+"',)";
-  // console.log(sql2);  
-  // let query2=db.query(sql2,(err,result)=>{
-  //   res.send({'error':err,'result':result})
-  // });
+});
+
+app.delete('/transaction/:id',(req,res)=>{
+  console.log(req.params.id);
+  let sql2="UPDATE table_name SET column1 = value1, column2 = value2, ...
+  WHERE condition;";
+  let query2=db.query(sql2,(err,result)=>{
+    res.send({'error':err,'result':result})
+  });
 
 });
 //Route Files
