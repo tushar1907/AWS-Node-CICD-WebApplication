@@ -5,6 +5,7 @@ const bodyParser=require('body-parser');
 const flash=require('connect-flash');
 const session = require('express-session');
 const bcrypt=require('bcrypt');
+const uuid=require('uuid');
 
 
 
@@ -132,8 +133,11 @@ app.post('/signup',(req,res)=>{
             password:req.body.pass.trim()
           };
           var h=bcrypt.hashSync(req.body.pass,5);
-          let sql2="insert into `user` (`username`,`password`)values('"+req.body.username+"','"+h+"')";
+          console.log(uuid());
+          let sql2="insert into `user` (`uuid`,`username`,`password`)values('"+uuid()+"','"+req.body.username+"','"+h+"')";
           let query2=db.query(sql2,(err,result)=>{
+            console.log("------->"+err)
+            console.log("------->"+result)            
             if(result==='undefined')
             {
               console.log('notdone'+err);
@@ -164,15 +168,14 @@ app.get('/transaction',(req,res)=>{
 });
 
 app.post('/transaction',(req,res)=>{
-  
+  console.log(req.session.username)
   let description = req.body.description;
   let amount = req.body.amount;
   let merchant = req.body.merchant;
   let date = req.body.date;
   let category = req.body.category;
   let sql2="insert into `transaction` (`description`,`amount`,`merchant`,`date`,`category`)values('"+description+"','"+amount+"','"+merchant+"','"+date+"','"+category+"')";
-  let sql3 = sql2 + "values('"+description+"','"+amount+"','"+merchant+"','"+date+"','"+category+"',)";
-  console.log(sql2);  
+  let sql3 = sql2 + "values('"+description+"','"+amount+"','"+merchant+"','"+date+"','"+category+"',)"; 
   let query2=db.query(sql2,(err,result)=>{
     res.send({'error':err,'result':result})
   });
@@ -188,7 +191,8 @@ app.delete('/transaction/:id',(req,res)=>{
 
 });
 
-app.put('/transaction/:id',(req,res)=>{  
+app.put('/transaction/:id',(req,res)=>{ 
+  console.log(req.session.username) 
   let sql2='UPDATE `transaction` SET `description`=?,`amount`=?,`merchant`=?,`date`=?,`category`=? where `id`=?';
   let query2=db.query(sql2,
     [req.body.description,req.body.amount, req.body.merchant,req.body.date,req.body.category, req.params.id]
