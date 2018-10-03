@@ -62,15 +62,16 @@
             "Type" : "AWS::EC2::Instance",
             "Properties" : {
                "ImageId" : "ami-9887c6e7",
-               "KeyName" : "csye6225-ec2key",
+               "KeyName" : "EC2",
                "AvailabilityZone" : "us-east-1a",
                "InstanceType" : "t2.micro",
+               "SubnetId" : {"Fn::ImportValue" : "csye6225-public-subnet-1"},
                "SecurityGroupIds" : [ {"Ref" : "SGweb"}],
 
 
                "BlockDeviceMappings" : [
                   {
-                     "DeviceName" : "csye-6225-ec2",
+                    "DeviceName": "/dev/sda1",
                      "Ebs" : {
                         "VolumeType" : "gp2",
                         "DeleteOnTermination" : "false",

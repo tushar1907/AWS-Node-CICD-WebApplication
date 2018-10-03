@@ -132,6 +132,15 @@
         "Export": {
           "Name": "csye6225-Networking-vpc"
         }
+      },
+      "SubnetId": {
+        "Description": "The public subne 1",
+        "Value": {
+          "Ref": "subnetPublic1"
+        },
+        "Export": {
+          "Name": "csye6225-public-subnet-1"
+        }
       }
     }
   }
