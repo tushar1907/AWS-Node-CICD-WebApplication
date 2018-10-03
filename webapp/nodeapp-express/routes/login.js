@@ -29,6 +29,7 @@ router.post('/',(req,res)=>{
         if(bcrypt.compareSync(req.body.pass,result[0].password))
         {
           console.log("success");
+          console.log(result[0].uuid);
           req.session.username=result[0].username;
           req.session.user=result[0];
           req.flash('success',result[0].username+' Logged In!');
