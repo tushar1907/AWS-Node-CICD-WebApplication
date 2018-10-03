@@ -133,11 +133,9 @@ app.post('/signup',(req,res)=>{
             password:req.body.pass.trim()
           };
           var h=bcrypt.hashSync(req.body.pass,5);
-          console.log(uuid());
+          
           let sql2="insert into `user` (`uuid`,`username`,`password`)values('"+uuid()+"','"+req.body.username+"','"+h+"')";
-          let query2=db.query(sql2,(err,result)=>{
-            console.log("------->"+err)
-            console.log("------->"+result)            
+          let query2=db.query(sql2,(err,result)=>{                       
             if(result==='undefined')
             {
               console.log('notdone'+err);
@@ -159,7 +157,6 @@ app.post('/signup',(req,res)=>{
 });
 
 app.get('/transaction',(req,res)=>{
-
   let q = "select * from `transaction`";
   let query2=db.query(q,(err,result)=>{
     res.send({'error':err,'result':result})
@@ -167,38 +164,52 @@ app.get('/transaction',(req,res)=>{
 
 });
 
-app.post('/transaction',(req,res)=>{
-  console.log(req.session.username)
+app.post('/transaction',(req,res)=>{   
   let description = req.body.description;
   let amount = req.body.amount;
   let merchant = req.body.merchant;
   let date = req.body.date;
   let category = req.body.category;
-  let sql2="insert into `transaction` (`description`,`amount`,`merchant`,`date`,`category`)values('"+description+"','"+amount+"','"+merchant+"','"+date+"','"+category+"')";
-  let sql3 = sql2 + "values('"+description+"','"+amount+"','"+merchant+"','"+date+"','"+category+"',)"; 
+  let sql2="insert into `transaction` (`description`,`amount`,`merchant`,`date`,`category`,`uuid`)values('"+description+"','"+amount+"','"+merchant+"','"+date+"','"+category+"','"+req.headers.uuid+"')";
   let query2=db.query(sql2,(err,result)=>{
-    res.send({'error':err,'result':result})
+    res.send({'error':err,'result':"Transaction successfully posted !"})
   });
-
 });
+
 
 app.delete('/transaction/:id',(req,res)=>{
-  console.log(req.params.id);
-  let sql2="DELETE FROM `transaction` WHERE id = 1";
-  let query2=db.query(sql2,(err,result)=>{
-    res.send({'error':err,'result':result})
-  });
-
+  let sql1="SELECT * from `transaction` where `tid`='"+req.params.id+"'";
+  let query1=db.query(sql1,(err,result)=>{
+    if(result.length!=0 & result[0].uuid == req.headers.uuid){
+      console.log('in the delete')
+      let sql2="DELETE FROM `transaction` WHERE `tid` = '"+req.params.id+"'";
+      let query2=db.query(sql2,(err,result)=>{
+      res.send({'error':err,'result':"Transaction successfully deleted !"})
+      });
+    }  
+    else{
+      res.send({'error':'User not authenticated to delete this transaction !'})
+    }  
+  }); 
 });
 
-app.put('/transaction/:id',(req,res)=>{ 
-  console.log(req.session.username) 
-  let sql2='UPDATE `transaction` SET `description`=?,`amount`=?,`merchant`=?,`date`=?,`category`=? where `id`=?';
-  let query2=db.query(sql2,
-    [req.body.description,req.body.amount, req.body.merchant,req.body.date,req.body.category, req.params.id]
-    ,(err,result)=>{
-    res.send({'error':err,'result':result})
-  });
+
+app.put('/transaction/:id',(req,res)=>{  
+
+  let sql1="SELECT * from `transaction` where `tid`='"+req.params.id+"'";
+  let query1=db.query(sql1,(err,result)=>{
+    if(result.length!=0 && result[0].uuid == req.headers.uuid){
+      let sql2='UPDATE `transaction` SET `description`=?,`amount`=?,`merchant`=?,`date`=?,`category`=? where `tid`=?';
+      let query2=db.query(sql2,
+        [req.body.description,req.body.amount, req.body.merchant,req.body.date,req.body.category, req.params.id]
+        ,(err,result)=>{
+        res.send({'error':err,'result':"Transaction successfully updated !"})
+      });
+    }  
+    else{
+      res.send({'error':'User not authenticated to update this transaction !'})
+    }  
+  }); 
 
 });
 

@@ -25,7 +25,7 @@ router.post('/',(req,res)=>{
     let sql="select * from `user` where `username`='"+req.body.username+"'";
     let query=db.query(sql,(err,result)=>{
       if(err){ throw err;}
-      if(result.length){
+      if(result.length){        
         if(bcrypt.compareSync(req.body.pass,result[0].password))
         {
           console.log("success");
