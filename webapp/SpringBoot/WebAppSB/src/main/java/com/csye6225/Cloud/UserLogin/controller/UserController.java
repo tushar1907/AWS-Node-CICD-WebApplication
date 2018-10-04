@@ -2,10 +2,12 @@ package com.csye6225.Cloud.UserLogin.controller;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -44,7 +46,11 @@ public class UserController {
 		encoded.setPassword(bcrypt.encode(user.getPassword()));
 		
 		userService.addUser(encoded);
-		
+	}
+	
+	@GetMapping("/user/{id}")
+	public Optional<User> getUser(@PathVariable int id){
+		return userService.getUser(id);
 	}
 
 }
