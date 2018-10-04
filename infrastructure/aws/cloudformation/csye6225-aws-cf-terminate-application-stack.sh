@@ -1,6 +1,8 @@
 stackname=$1
 
+
 DeleteOutput=$(aws cloudformation delete-stack --stack-name $stackname)
+
 
 if [ $? -eq 0 ]; then
 	echo "Deleting stack..."
