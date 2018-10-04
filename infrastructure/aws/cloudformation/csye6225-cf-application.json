@@ -1,0 +1,86 @@
+{
+
+    "Description" : "Networking Stack",
+    "AWSTemplateFormatVersion" : "2010-09-09",
+    "Parameters" : {
+      "stackname" : {
+        "Description" : "Stack Name",
+        "Type" : "String",
+        "Default" : "stack01"
+      }
+
+    },
+
+    "Resources" : {        
+
+        "SGweb" : {
+            "Type" : "AWS::EC2::SecurityGroup",
+            
+            "Properties" : {
+               "GroupName" : "csye6225-webapp",
+               "GroupDescription" : "allow TCP traffic on port 22, 80 and 443",
+               "VpcId" : {"Fn::ImportValue" : "csye6225-Networking-vpc"},
+               "SecurityGroupIngress" : [{
+                     "IpProtocol" : "tcp",
+                     "FromPort" : 80,
+                     "ToPort" : 80,
+                     "CidrIp" : "0.0.0.0/0"
+                  },
+                {
+                    "IpProtocol" : "tcp",
+                     "FromPort" : 22,
+                     "ToPort" : 22,
+                     "CidrIp" : "0.0.0.0/0"
+                },
+            {
+                "IpProtocol" : "tcp",
+                     "FromPort" : 443,
+                     "ToPort" : 443,
+                     "CidrIp" : "0.0.0.0/0"
+            }]
+               
+            }
+         },
+         "SGrds" : {
+            "Type" : "AWS::EC2::SecurityGroup",
+            "Properties" : {
+               "GroupName" : "csye6225-rds",
+               "GroupDescription" : "allow TCP traffic on port 22, 80 and 443",
+               "VpcId" : {"Fn::ImportValue" : "csye6225-Networking-vpc"},
+               "SecurityGroupIngress" : [{
+                     "IpProtocol" : "tcp",
+                     "FromPort" : 3306,
+                     "ToPort" : 3306,
+                     "CidrIp" : "0.0.0.0/0"
+                  }
+            ]
+               
+            }
+         },
+
+         "MyEC2Instance" : {
+            "Type" : "AWS::EC2::Instance",
+            "Properties" : {
+               "ImageId" : "ami-9887c6e7",
+               "KeyName" : "EC2",
+               "AvailabilityZone" : "us-east-1a",
+               "InstanceType" : "t2.micro",
+               "SubnetId" : {"Fn::ImportValue" : "csye6225-public-subnet-1"},
+               "SecurityGroupIds" : [ {"Ref" : "SGweb"}],
+
+
+               "BlockDeviceMappings" : [
+                  {
+                    "DeviceName": "/dev/sda1",
+                     "Ebs" : {
+                        "VolumeType" : "gp2",
+                        "DeleteOnTermination" : "false",
+                        "VolumeSize" : "20"
+                     }
+                  }]
+            }
+         }
+    }
+    
+
+}
