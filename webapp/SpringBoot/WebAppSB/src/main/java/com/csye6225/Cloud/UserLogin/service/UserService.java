@@ -1,5 +1,7 @@
 package com.csye6225.Cloud.UserLogin.service;
 
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -14,6 +16,10 @@ public class UserService {
 	
 	public void addUser(User user) {
 		userDAO.save(user);
+	}
+	
+	public Optional<User> getUser(int id) {
+		return userDAO.findById(id);
 	}
 
 }
