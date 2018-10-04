@@ -1,2 +1,1 @@
-Now git 
-This is the test file
+The current file contains two web apps
