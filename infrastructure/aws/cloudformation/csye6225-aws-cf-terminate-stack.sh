@@ -1,14 +1,14 @@
 stackname=$1
-createOutput=$(aws cloudformation delete-stack --stack-name $stackname)
+DeleteOutput=$(aws cloudformation delete-stack --stack-name $stackname)
 
 if [ $? -eq 0 ]; then
 	echo "Deletion stack..."
 	aws cloudformation wait stack-delete-complete --stack-name $stackname
 	echo "Stack Deleted successfully. Stack Id below: "
 
-	echo $createOutput
+	echo $DeleteOutput
 
 else
-	echo "Error in creation of stack"
-	echo $createOutput
+	echo "Error in Deletion of stack"
+	echo $DeleteOutput
 fi;
