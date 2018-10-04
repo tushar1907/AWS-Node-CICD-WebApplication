@@ -1,5 +1,6 @@
 {
 
+<<<<<<< HEAD
   "Description" : "Networking Stack",
   "AWSTemplateFormatVersion" : "2010-09-09",
   "Parameters" : {
@@ -8,6 +9,16 @@
       "Type" : "String",
       "Default" : "stack01"
     }
+=======
+    "Description" : "Networking Stack",
+    "AWSTemplateFormatVersion" : "2010-09-09",
+    "Parameters" : {
+      "stackname" : {
+        "Description" : "Stack Name",
+        "Type" : "String",
+        "Default" : "stack01"
+      }
+>>>>>>> a7aaaab59654098c83920fcabe8ca132bb2717ff
 
   },
 
@@ -83,4 +94,8 @@
   }
   
 
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> a7aaaab59654098c83920fcabe8ca132bb2717ff
