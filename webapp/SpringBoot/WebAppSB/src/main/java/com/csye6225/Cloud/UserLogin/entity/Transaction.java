@@ -7,39 +7,37 @@ import javax.persistence.Table;
 
 import org.hibernate.annotations.GenericGenerator;
 
-import java.util.UUID;
-
-import javax.persistence.Column;
-
 @Entity
 @Table(name="transaction")
 public class Transaction {
 	
 	@Id
-	@GeneratedValue(generator="UUID")
-	@GenericGenerator(name = "UUID",strategy = "org.hibernate.id.UUIDGenerator")
-	@Column(name = "id", updatable = false, nullable = false)
-	private UUID id;
+//	@Column(name = "id", updatable = false, nullable = false)
+	@GeneratedValue(generator="uuid")
+	@GenericGenerator(name="uuid", strategy="uuid")
+	private String id;
 	
-	@Column(name="description")
+//	@Column(name="description")
 	private String description;
 	
-	@Column(name="merchant")
+//	@Column(name="merchant")
 	private String merchant;
 	
-	@Column(name="amount")
+//	@Column(name="amount")
 	private String amount;
 	
-	@Column(name="date")
+//	@Column(name="date")
 	private String date;
 	
-	@Column(name="category")
+//x	@Column(name="category")
 	private String category;
 	
+//	@ManyToOne
+//	@JoinColumn(name="user_id")
+//	private User user;
 	
-
+	
 	public Transaction(String description, String merchant, String amount, String date, String category) {
-		super();
 		this.description = description;
 		this.merchant = merchant;
 		this.amount = amount;
@@ -47,19 +45,15 @@ public class Transaction {
 		this.category = category;
 	}
 	
-	
-
 	public Transaction() {
 		
 	}
 
-
-
-	public UUID getId() {
+	public String getId() {
 		return id;
 	}
 
-	public void setId(UUID id) {
+	public void setId(String id) {
 		this.id = id;
 	}
 
@@ -102,7 +96,14 @@ public class Transaction {
 	public void setCategory(String category) {
 		this.category = category;
 	}
+
+	@Override
+	public String toString() {
+		return "Transaction [id=" + id + ", description=" + description + ", merchant=" + merchant + ", amount="
+				+ amount + ", date=" + date + ", category=" + category + "]";
+	}
 	
 	
-	
+
+
 }
