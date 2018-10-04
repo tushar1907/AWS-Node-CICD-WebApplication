@@ -1,15 +1,5 @@
 {
 
-<<<<<<< HEAD
-  "Description" : "Networking Stack",
-  "AWSTemplateFormatVersion" : "2010-09-09",
-  "Parameters" : {
-    "stackname" : {
-      "Description" : "Stack Name",
-      "Type" : "String",
-      "Default" : "stack01"
-    }
-=======
     "Description" : "Networking Stack",
     "AWSTemplateFormatVersion" : "2010-09-09",
     "Parameters" : {
@@ -18,7 +8,6 @@
         "Type" : "String",
         "Default" : "stack01"
       }
->>>>>>> a7aaaab59654098c83920fcabe8ca132bb2717ff
 
   },
 
@@ -73,7 +62,7 @@
           "Type" : "AWS::EC2::Instance",
           "Properties" : {
              "ImageId" : "ami-9887c6e7",
-             "KeyName" : "EC2",
+             "KeyName" : "csye6225keyPair",
              "AvailabilityZone" : "us-east-1a",
              "InstanceType" : "t2.micro",
              "SubnetId" : {"Fn::ImportValue" : "csye6225-public-subnet-1"},
@@ -94,8 +83,4 @@
   }
   
 
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> a7aaaab59654098c83920fcabe8ca132bb2717ff
