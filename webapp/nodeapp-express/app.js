@@ -136,7 +136,7 @@ app.post('/signup',(req,res)=>{
           };
           var h=bcrypt.hashSync(req.body.pass,5);
           let saveuuid = uuid();
-          console.log(saveuuid);
+          console.log("User ID------>" + saveuuid);
           let sql2="insert into `user` (`uuid`,`username`,`password`)values('"+saveuuid+"','"+req.body.username+"','"+h+"')";
           let query2=db.query(sql2,(err,result)=>{                       
             if(result==='undefined')
@@ -179,7 +179,7 @@ app.post('/transaction',(req,res)=>{
     if(result.length!=0){
       if(description && amount && merchant && date && category){
         let saveUuid = uuid()
-        console.log(saveUuid);
+        console.log("Transaction ID------>" + saveUuid);
         let sql2="insert into `transaction` (`tid`,`description`,`amount`,`merchant`,`date`,`category`,`uuid`)values('"+saveUuid+"','"+description+"','"+amount+"','"+merchant+"','"+date+"','"+category+"','"+req.headers.uuid+"')";
         let query2=db.query(sql2,(err,result)=>{
         res.status(201).send({'error':err,'result':"Transaction successfully posted !"})
@@ -224,6 +224,8 @@ app.put('/transaction/:id',(req,res)=>{
   if(req.params.id){
     let sql1="SELECT * from `transaction` where `tid`='"+req.params.id+"'";
     let query1=db.query(sql1,(err,result)=>{
+      console.log("------>"+ typeof result[0].uuid);
+      console.log("------>"+typeof req.headers.uuid);
       if(result.length!=0 && result[0].uuid == req.headers.uuid){
         let sql2='UPDATE `transaction` SET `description`=?,`amount`=?,`merchant`=?,`date`=?,`category`=? where `tid`=?';
         let query2=db.query(sql2,
@@ -240,9 +242,66 @@ app.put('/transaction/:id',(req,res)=>{
   else{
     res.status(400).send({'result':"Bad request !"})
   }
-  
-
 });
+
+//Attachments
+app.post('/transaction/:tid/attachments',(req,res)=>{   
+  let url = req.body.url;  
+  let sql1="SELECT * from `transaction` where `tid`='"+req.params.tid+"'";
+  let query1=db.query(sql1,(err,result)=>{
+    console.log("------>"+result);    
+    if(result[0].uuid == req.headers.uuid){
+
+      if(result.length!=0){
+
+        if(url){
+          let saveUuid = uuid()
+          console.log("Attachment ID------>" + saveUuid);
+          let sql2="insert into `attachment` (`aid`,`url`,`tid`)values('"+saveUuid+"','"+url+"','"+req.params.tid+"')";
+          let query2=db.query(sql2,(err,result)=>{
+          res.status(201).send({'error':err,'result':"Attachment for the transaction saved successfully!"})
+          });
+        }
+        else{
+          res.status(400).send({'error':err,'result':"Url fields are missing or null !"})
+        }
+
+      }else res.status(401).send({'error':'Transaction does not exist'})
+      
+
+    }  
+    else{
+      res.status(401).send({'error':'User not authenticated to delete this transaction !'})
+    }  
+  });
+  
+});
+
+//Get Attachments related to this transaction
+app.get('/transaction/:tid/attachments',(req,res)=>{   
+  let sql1="SELECT * from `attachment` where `tid`='"+req.params.tid+"'";
+  let sql2="SELECT * from `transaction` where `tid`='"+req.params.tid+"'"
+  let query1=db.query(sql2,(err,result)=>{
+    console.log(result);
+    console.log("-->"+result[0].uuid);
+    console.log("-->"+req.headers.uuid) ;
+    if(result[0].uuid == req.headers.uuid){
+      let query = db.query(sql1,(err,results)=>{
+        if(results.length!=0){
+
+          res.status(200).send({'result': results})
+      
+        }else res.status(401).send({'error':'No attachments for this transaction !'}) 
+      })       
+
+    }  
+
+    else res.status(401).send({'error':'User not authenticated to get the attachments !'})
+      
+  });
+  
+});
+
 
 
 //Route Files
@@ -253,3 +312,6 @@ app.use('/login',login);
 app.listen('3030',()=>{
   console.log('Server started on 3030')
 });
+
+
+
