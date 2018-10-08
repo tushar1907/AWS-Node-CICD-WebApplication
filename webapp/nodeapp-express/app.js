@@ -6,7 +6,9 @@ const flash=require('connect-flash');
 const session = require('express-session');
 const bcrypt=require('bcrypt');
 const uuid=require('uuid');
-
+const fs = require('fs')
+const config = require('dotenv').config()
+const AWS = require('aws-sdk')
 
 
 const conn=require('./dbconn.js');
@@ -18,13 +20,7 @@ db.connect((err)=>{
   }
   console.log("Mysql connected!...");
 });
-
-//db.connect((err)=>{
-//  if(err){
-//    throw err;
-//  }
-//  console.log("Mysql connected!...")
-//});
+console.log(process.env.NODEENV)
 
 const app=express();
 
@@ -253,14 +249,46 @@ app.post('/transaction/:tid/attachments',(req,res)=>{
     if(result[0].uuid == req.headers.uuid){
 
       if(result.length!=0){
-
+        
         if(url){
-          let saveUuid = uuid()
-          console.log("Attachment ID------>" + saveUuid);
-          let sql2="insert into `attachment` (`aid`,`url`,`tid`)values('"+saveUuid+"','"+url+"','"+req.params.tid+"')";
-          let query2=db.query(sql2,(err,result)=>{
-          res.status(201).send({'error':err,'result':"Attachment for the transaction saved successfully!"})
-          });
+          var nameString = url;
+          var filename = 'save/'+ nameString.split("/").pop();
+          if(process.env.NODENV === 'production'){
+            let s3bucket = new AWS.S3({
+              accessKeyId: 'AKIAIFAMY56VUNAGXVGA',
+              secretAccessKey: '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',
+              Bucket: 'node_s3_attachments',
+            });
+            s3bucket.createBucket(function () {
+              var params = {
+               Bucket: BUCKET_NAME,
+               Key: file.name,
+               Body: file.data,
+              };
+              s3bucket.upload(params, function (err, data) {
+               if (err) {
+                console.log('error in callback');
+                console.log(err);
+               }
+               console.log('success');
+               console.log(data);
+              });
+            });
+
+          }else{
+
+            fs.copyFile(url, filename, (err) => {
+              if (err) throw err;
+              console.log('source.txt was copied to destination');            
+            });        
+            let saveUuid = uuid()
+            console.log("Attachment ID------>" + saveUuid);
+            let sql2="insert into `attachment` (`aid`,`url`,`tid`)values('"+saveUuid+"','"+filename+"','"+req.params.tid+"')";
+            let query2=db.query(sql2,(err,result)=>{
+            res.status(201).send({'error':err,'result':"Attachment for the transaction saved successfully!"})
+            });
+          }          
+
         }
         else{
           res.status(400).send({'error':err,'result':"Url fields are missing or null !"})
@@ -278,7 +306,8 @@ app.post('/transaction/:tid/attachments',(req,res)=>{
 });
 
 //Get Attachments related to this transaction
-app.get('/transaction/:tid/attachments',(req,res)=>{   
+app.get('/transaction/:tid/attachments',(req,res)=>{ 
+  let url = req.body.url;  
   let sql1="SELECT * from `attachment` where `tid`='"+req.params.tid+"'";
   let sql2="SELECT * from `transaction` where `tid`='"+req.params.tid+"'"
   let query1=db.query(sql2,(err,result)=>{
@@ -292,8 +321,31 @@ app.get('/transaction/:tid/attachments',(req,res)=>{
           res.status(200).send({'result': results})
       
         }else res.status(401).send({'error':'No attachments for this transaction !'}) 
-      })       
+      })
+    }  
 
+    else res.status(401).send({'error':'User not authenticated to get the attachments !'})
+      
+  });
+  
+});
+
+//Update Attachments related to this transaction
+app.put('/transaction/:tid/attachments',(req,res)=>{   
+  let sql1="SELECT * from `attachment` where `tid`='"+req.params.tid+"'";
+  let sql2="SELECT * from `transaction` where `tid`='"+req.params.tid+"'"
+  let query1=db.query(sql2,(err,result)=>{
+    console.log(result);
+    console.log("-->"+result[0].uuid);
+    console.log("-->"+req.headers.uuid) ;
+    if(result[0].uuid == req.headers.uuid){
+      let query = db.query(sql1,(err,results)=>{
+        if(results.length!=0){
+
+          res.status(200).send({'result': results})
+      
+        }else res.status(401).send({'error':'No attachments for this transaction !'}) 
+      })
     }  
 
     else res.status(401).send({'error':'User not authenticated to get the attachments !'})
