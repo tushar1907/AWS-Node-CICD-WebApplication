@@ -303,8 +303,7 @@ app.post('/transaction/:tid/attachments',(req,res)=>{
           res.status(400).send({'error':err,'result':"Url fields are missing or null !"})
         }
 
-      }else res.status(401).send({'error':'Transaction does not exist'})
-      
+      }else res.status(401).send({'error':'Transaction does not exist'})      
 
     }  
     else{
