@@ -1,1 +1,51 @@
-vfvfevefvefvfevfevv
+TUSHAR GUPTA
+ 60- Saint Germain Street #3, Boston, MA 02115 | gupta.tus@husky.neu.edu | 781-869-0703
+https://www.linkedin.com/in/tushar-gupta-b0483374/ | https://github.com/tushar1907
+Education      
+Graduating from Northeastern University Boston, MA				      	       Expected Graduation 2019
+Master of Science in Information Systems
+Courses: Application Development, Advanced Data Science (Web-Scrapping and Data Prediction Models),
+Web Design (Angular 6 and MongoDB), Web Tools and Methods (Spring and Hibernate).
+                                                                                                                
+JSS Academy of Technical Education Noida, India	                 	   	    	           		      June 2014
+Bachelor of Engineering Information Technology
+Courses: Java Development, Data Structures, Operating Systems, Computer Networks.
+
+Technical Skills
+•	Programming Languages: JAVA, Python, MongoDB, MySQL, PostgreSQL, Oracle 11g.
+•	Web Technologies	        : React, REDUX, Angular 6, React, Node JS, Springboot, Hibernate.
+•	Tools                                 : Visual Studio Code, Eclipse, NetBeans ,Java Beans, Jupyter Notebook, Anaconda.
+•	Skills                                 : Software Development, Android Development, SDLC, Agile , Quality Assurance.
+•	Certifications                   : AWS Certified Developer Associate,Python for Absolute Beginners Certification, HP 
+   			          certified Java Professional,Certified in IBM Tivoli  Directory Server.   
+•	Version Control               : GitHub, BitBucket.
+
+Professional Experience
+Compound Viewer (Compound Tracking Angular and Python Django Application)     		     Jun 2018 – Present
+•	Developed an internal application Angular 6.0 client side and Django server side with PostgreSQL database.
+•	Devised this integrated interface tool which manages compounds, experiment and keeps track of data generated in observation.
+•	Critiqued generated data with histograms and scatter plots which saves the time and cost of tracking and management of experiments by 60% as compared to other external tools.
+•	Devised a fully functional RESTful framework in python Django with CRUD API calls utilizing PostgreSQL database.
+•	Integrated Identity Access Management functionality giving admin, supervisor and basic user rights to employees.
+•	Leveraged activate deactivate and notification features to provide a better Service Access Management for the software.
+Assistant System Engineer, Tata Consultancy Services, Mumbai              		             		     Jan 2015 – Jul 2017 
+•	Developed an application using Java, Springboot and Micro Services in Agile environment which improved security and setting rules for user customization of the largest Canadian Financial Institution.
+•	Designed in SPRING MVC Architecture all the clients and their financial data is stored using Hibernate.
+•	Integrated with scalable and high performance infrastructure automation of the allotment of mortgages and fraud tracking saves 70% of the time for the workflow..
+•	Inculcated risk management modules which utilize RESTful web services improving risk management by 30%.
+                  
+Academic Projects
+The Burger Builder (A React NodeJS application)		                           	             		    May 2018 – Present
+•	Designed an interactive burger making application using React components with NodeJS server.
+•	Building higher order components, containers and services made application’s view and structure management better.
+•	Implemented Http/AJAX request from application for server communication and Redux for state management. These technologies avoided tedious state management and request, response code in the app.
+•	Utilized Firebase authentication and database for better user access management and data storage.
+Money Dream (An Finance Angular-6 application)		                           	             		  Jan 2018 – Mar 2018
+•	Developed a portal for loan management systems with login and registration functionality in Angular-6 with NodeJS server side and MongoDB in database.
+•	It consists of features like wallet, transaction processing and request and payoff loans taken using two way property binding and structural directives, and other basic web development like HTML, CSS and Javascript.
+•	Used MongoDB for user and transaction data storage, retrieval, querying data for better data management performance.
+•	Basic syntax used of ES6 and other advances encryption techniques and technologies.
+HR Operation Manager(Object Oriented Programming, Java Spring Hibernate, SQL)                       	  Sept 2017 – Dec 2017
+•	Developed the portal of recruitment for companies, which includes registration, details submission and placement       history of a company and various applicants using Java Object Oriented Programming. 
+•	Fulfilling its purpose the project facilitates the automation of the overall recruitment process for both, the privileged and the underprivileged. It includes request/response to servers, session management with cookies for users.
+•	A Full stack devops application with lifecycle development, management and data persistence of the companies and applicants which was taken care of backend in Hibernate and Relational Database MySql.

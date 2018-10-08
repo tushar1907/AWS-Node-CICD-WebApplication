@@ -20,7 +20,7 @@ db.connect((err)=>{
   }
   console.log("Mysql connected!...");
 });
-console.log(process.env.NODEENV)
+console.log("Enviornment : " + process.env.NODENV)
 
 const app=express();
 
@@ -245,38 +245,45 @@ app.post('/transaction/:tid/attachments',(req,res)=>{
   let url = req.body.url;  
   let sql1="SELECT * from `transaction` where `tid`='"+req.params.tid+"'";
   let query1=db.query(sql1,(err,result)=>{
-    console.log("------>"+result);    
+    //console.log("------>"+result);    
     if(result[0].uuid == req.headers.uuid){
 
       if(result.length!=0){
         
         if(url){
-          var nameString = url;
-          var filename = 'save/'+ nameString.split("/").pop();
-          if(process.env.NODENV === 'production'){
-            let s3bucket = new AWS.S3({
+          var nameString = url;          
+          console.log(process.env.NODENV)
+
+          if(process.env.NODENV === "Prod"){
+            console.log("In the production enviornment")
+            let s3 = new AWS.S3({
               accessKeyId: 'AKIAIFAMY56VUNAGXVGA',
               secretAccessKey: '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',
-              Bucket: 'node_s3_attachments',
+              Bucket: 'nodes3attachments',
             });
-            s3bucket.createBucket(function () {
-              var params = {
-               Bucket: BUCKET_NAME,
-               Key: file.name,
-               Body: file.data,
-              };
-              s3bucket.upload(params, function (err, data) {
-               if (err) {
-                console.log('error in callback');
-                console.log(err);
-               }
-               console.log('success');
-               console.log(data);
-              });
-            });
+            
+              const fileName = url;
+              fs.readFile(fileName, (err, data) => {
+                console.log(data)
+                if (err) throw err;
+                const params = {
+                    Bucket: 'nodes3attachments', // pass your bucket name
+                    Key: 'hello.txt', // file will be saved as testBucket/contacts.csv
+                    Body: data,
+                    ACL: 'public-read'
+                };
+                s3.upload(params, function(s3Err, data) {
+                    if (s3Err) throw s3Err
+                    res.send({'location': data})
 
-          }else{
+                });
+             });            
 
+          }
+          else if(process.env.NODENV === "Dev"){
+
+            console.log("In the development enviornment")
+            var filename = 'save/'+ nameString.split("/").pop();
             fs.copyFile(url, filename, (err) => {
               if (err) throw err;
               console.log('source.txt was copied to destination');            
@@ -287,7 +294,9 @@ app.post('/transaction/:tid/attachments',(req,res)=>{
             let query2=db.query(sql2,(err,result)=>{
             res.status(201).send({'error':err,'result':"Attachment for the transaction saved successfully!"})
             });
-          }          
+          }else{
+            console.log("not in any enviornment")
+          }         
 
         }
         else{
