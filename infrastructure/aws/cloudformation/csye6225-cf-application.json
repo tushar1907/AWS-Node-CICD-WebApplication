@@ -79,7 +79,64 @@
                    }
                 }]
           }
-       }
+       },
+       "myDynamoDBTable" : {
+        "Type" : "AWS::DynamoDB::Table",
+        "Properties" : {
+          "AttributeDefinitions" : [
+            {
+              "AttributeName" : "id",
+              "AttributeType" : "S"
+            }
+          ],
+          "KeySchema" : [
+            {
+              "AttributeName" : "id",
+              "KeyType" : "HASH"
+            }
+          ],
+          "ProvisionedThroughput" : {
+            "ReadCapacityUnits" : "5",
+            "WriteCapacityUnits" : "5"
+          },
+          "TableName" : "csye6225"
+        }
+  
+      },
+      "s3Bucket" : {
+        "Type" : "AWS::S3::Bucket",
+        "Properties" : {
+          "BucketName" : "csye6225-fall2018-sharmaha.me.csye6225.com"
+        }
+     },
+     "myDBSubnetGroup" : {
+        "Type" : "AWS::RDS::DBSubnetGroup",
+        "Properties" : {
+           "DBSubnetGroupDescription" : "Subnet description of db subnets",
+           "SubnetIds" : [ {"Fn::ImportValue" : "csye6225-public-subnet-1"},{"Fn::ImportValue" : "csye6225-public-subnet-2"}
+             ],
+           "Tags" : [ {"Key" : "Name", "Value" : "dbSubnetGroup"} ]
+        }
+     },
+      "myRDSInstance" : {
+        "Type" : "AWS::RDS::DBInstance",
+        "Properties" : {
+           "DBName" : "csye6225",
+           "AllocatedStorage" : "20",
+           "Engine" : "MySQL",
+          "EngineVersion" : "5.6.37",
+          "DBInstanceClass" : "db.t2.medium",
+          "MultiAZ" : false,
+          "DBInstanceIdentifier" : "csye6225-fall2018",
+          "MasterUsername" : "csye6225master",
+          "MasterUserPassword" : "csye6225password",
+          "DBSubnetGroupName" : {"Ref" : "myDBSubnetGroup"},
+          "PubliclyAccessible" : false,
+          "VPCSecurityGroups" : [{"Ref" : "SGrds"}]
+  
+        }  
+    }
+  
   }
   
 
