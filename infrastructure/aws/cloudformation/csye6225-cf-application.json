@@ -1,0 +1,143 @@
+{
+
+    "Description" : "Application Stack",
+    "AWSTemplateFormatVersion" : "2010-09-09",
+    "Parameters" : {
+      "stackname" : {
+        "Description" : "Stack Name",
+        "Type" : "String",
+        "Default" : "stack01"
+      }
+
+  },
+
+  "Resources" : {        
+
+      "SGweb" : {
+          "Type" : "AWS::EC2::SecurityGroup",
+          
+          "Properties" : {
+             "GroupName" : "csye6225-webapp",
+             "GroupDescription" : "allow TCP traffic on port 22, 80 and 443",
+             "VpcId" : {"Fn::ImportValue" : "csye6225-Networking-vpc"},
+             "SecurityGroupIngress" : [{
+                   "IpProtocol" : "tcp",
+                   "FromPort" : 80,
+                   "ToPort" : 80,
+                   "CidrIp" : "0.0.0.0/0"
+                },
+              {
+                  "IpProtocol" : "tcp",
+                   "FromPort" : 22,
+                   "ToPort" : 22,
+                   "CidrIp" : "0.0.0.0/0"
+              },
+          {
+              "IpProtocol" : "tcp",
+                   "FromPort" : 443,
+                   "ToPort" : 443,
+                   "CidrIp" : "0.0.0.0/0"
+          }]
+             
+          }
+       },
+       "SGrds" : {
+          "Type" : "AWS::EC2::SecurityGroup",
+          "Properties" : {
+             "GroupName" : "csye6225-rds",
+             "GroupDescription" : "allow TCP traffic on port 22, 80 and 443",
+             "VpcId" : {"Fn::ImportValue" : "csye6225-Networking-vpc"},
+             "SecurityGroupIngress" : [{
+                   "IpProtocol" : "tcp",
+                   "FromPort" : 3306,
+                   "ToPort" : 3306,
+                   "CidrIp" : "0.0.0.0/0"
+                }
+          ]
+             
+          }
+       },
+
+       "MyEC2Instance" : {
+          "Type" : "AWS::EC2::Instance",
+          "Properties" : {
+             "ImageId" : "ami-9887c6e7",
+             "KeyName" : "csye6225keyPair",
+             "AvailabilityZone" : "us-east-1a",
+             "InstanceType" : "t2.micro",
+             "SubnetId" : {"Fn::ImportValue" : "csye6225-public-subnet-1"},
+             "SecurityGroupIds" : [ {"Ref" : "SGweb"}],
+
+
+             "BlockDeviceMappings" : [
+                {
+                  "DeviceName": "/dev/sda1",
+                   "Ebs" : {
+                      "VolumeType" : "gp2",
+                      "DeleteOnTermination" : "false",
+                      "VolumeSize" : "20"
+                   }
+                }]
+          }
+       },
+       "myDynamoDBTable" : {
+        "Type" : "AWS::DynamoDB::Table",
+        "Properties" : {
+          "AttributeDefinitions" : [
+            {
+              "AttributeName" : "id",
+              "AttributeType" : "S"
+            }
+          ],
+          "KeySchema" : [
+            {
+              "AttributeName" : "id",
+              "KeyType" : "HASH"
+            }
+          ],
+          "ProvisionedThroughput" : {
+            "ReadCapacityUnits" : "5",
+            "WriteCapacityUnits" : "5"
+          },
+          "TableName" : "csye6225"
+        }
+  
+      },
+      "s3Bucket" : {
+        "Type" : "AWS::S3::Bucket",
+        "Properties" : {
+          "BucketName" : "csye6225-fall2018-sharmaha.me.csye6225.com"
+        }
+     },
+     "myDBSubnetGroup" : {
+        "Type" : "AWS::RDS::DBSubnetGroup",
+        "Properties" : {
+           "DBSubnetGroupDescription" : "Subnet description of db subnets",
+           "SubnetIds" : [ {"Fn::ImportValue" : "csye6225-public-subnet-1"},{"Fn::ImportValue" : "csye6225-public-subnet-2"}
+             ],
+           "Tags" : [ {"Key" : "Name", "Value" : "dbSubnetGroup"} ]
+        }
+     },
+      "myRDSInstance" : {
+        "Type" : "AWS::RDS::DBInstance",
+        "Properties" : {
+           "DBName" : "csye6225",
+           "AllocatedStorage" : "20",
+           "Engine" : "MySQL",
+          "EngineVersion" : "5.6.37",
+          "DBInstanceClass" : "db.t2.medium",
+          "MultiAZ" : false,
+          "DBInstanceIdentifier" : "csye6225-fall2018",
+          "MasterUsername" : "csye6225master",
+          "MasterUserPassword" : "csye6225password",
+          "DBSubnetGroupName" : {"Ref" : "myDBSubnetGroup"},
+          "PubliclyAccessible" : false,
+          "VPCSecurityGroups" : [{"Ref" : "SGrds"}]
+  
+        }  
+    }
+  
+  }
+  
+
+}
