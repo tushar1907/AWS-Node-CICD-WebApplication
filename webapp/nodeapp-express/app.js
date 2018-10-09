@@ -263,18 +263,26 @@ app.post('/transaction/:tid/attachments',(req,res)=>{
             });
             
               const fileName = url;
-              fs.readFile(fileName, (err, data) => {
+              var filename = nameString.split("/").pop();
+              fs.readFile(url, (err, data) => {
                 console.log(data)
                 if (err) throw err;
                 const params = {
                     Bucket: 'nodes3attachments', // pass your bucket name
-                    Key: 'hello.txt', // file will be saved as testBucket/contacts.csv
+                    Key: filename, // file will be saved as testBucket/contacts.csv
                     Body: data,
                     ACL: 'public-read'
                 };
                 s3.upload(params, function(s3Err, data) {
                     if (s3Err) throw s3Err
-                    res.send({'location': data})
+                    //res.send({'location': data})
+                    //console.log("location -----> " + data.Location)
+                    let saveUuid = uuid()
+                    console.log("Attachment ID------>" + saveUuid);
+                    let sql2="insert into `attachment` (`aid`,`url`,`tid`)values('"+saveUuid+"','"+data.Location+"','"+req.params.tid+"')";
+                    let query2=db.query(sql2,(err,result)=>{
+                    res.status(201).send({'error':err,'result':"Attachment for the transaction saved successfully!"})
+                    });
 
                 });
              });            
@@ -316,9 +324,7 @@ app.post('/transaction/:tid/attachments',(req,res)=>{
 app.get('/transaction/:tid/attachments',(req,res)=>{ 
   let url = req.body.url;  
   let sql1="SELECT * from `attachment` where `tid`='"+req.params.tid+"'";
-  let sql2="SELECT * from `transaction` where `tid`='"+req.params.tid+"'"
-
-  
+  let sql2="SELECT * from `transaction` where `tid`='"+req.params.tid+"'"; 
 
   let query1=db.query(sql2,(err,result)=>{
     console.log(result);
@@ -327,7 +333,7 @@ app.get('/transaction/:tid/attachments',(req,res)=>{
     if(result[0].uuid == req.headers.uuid){
       let query = db.query(sql1,(err,results)=>{
         if(results.length!=0){
-
+          // console.log("result 1---->>" + results[0].url);
           res.status(200).send({'result': results})
       
         }else res.status(401).send({'error':'No attachments for this transaction !'}) 
@@ -342,44 +348,71 @@ app.get('/transaction/:tid/attachments',(req,res)=>{
 
 //Delete sepecific Attachment related to this transaction
 app.delete('/transaction/:tid/attachments/:aid',(req,res)=>{   
-  let sql1="SELECT * from `attachment` where `tid`='"+req.params.tid+"'";
+  
   let sql2="SELECT * from `transaction` where `tid`='"+req.params.tid+"'"
 
   let query1=db.query(sql2,(err,result)=>{
     if(result.length!=0){
 
-      if(result[0].uuid == req.headers.uuid){
-      
-      if(url){
-        var nameString = url;          
+      if(result[0].uuid == req.headers.uuid){       
+             
         console.log(process.env.NODENV)
         if(process.env.NODENV === "Prod"){
-          
+            let sql1="SELECT * from `attachment` where `aid`='"+req.params.aid+"'";
+            let query1=db.query(sql1,(err,result1)=>{
+              if(err) throw err
+              console.log("result 1---->>" + result1[0].url);
+              if(result1.length!=0){
+                console.log('url is ----> '+ result1[0].url)
+                var filename = result1[0].url.split("/").pop();
+                console.log("File name is==----->> "+ filename);
+                let s3 = new AWS.S3({
+                  accessKeyId: 'AKIAIFAMY56VUNAGXVGA',
+                  secretAccessKey: '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',
+                  Bucket: 'nodes3attachments',
+                });
+                var params = {
+                    Bucket: 'nodes3attachments',
+                    Key: filename
+                };
+                s3.deleteObject(params, function (err, data) {
+                  if(err) throw err
+                  if (data) {
+                      console.log("File deleted successfully");
+                  }
+                  else {
+                      console.log("Check if you have sufficient permissions : "+err);
+                  }
+                });
+              }else res.status(401).send({'error':err,'result':"This specific attachment does not exist"})             
+            });            
         }
-      }
-    }else res.status(401).send({'error':'User not authenticated to delete this transaction !'})   
 
-  }else res.status(401).send({'error':'Transaction does not exist'}) 
+        else if(process.env.NODENV === "Dev"){
+            console.log("In the development enviornment")
+            var filename = 'save/'+ nameString.split("/").pop();
+            let sql1="SELECT * from `attachment` where `aid`='"+req.params.aid+"'";
+            let query1=db.query(sql1,(err,result1)=>{ 
+                if(err) throw err
+                if(result1.length!==0){
+                  var filename = 'save/' + result1[0].url.split("/").pop();
+                  fs.unlink(filename, (err) => {
+                    if (err) throw err;
+                    console.log('File deleted successully from dev enviornment save folder !');
+                  });
+                }
+            }); 
+            
+            }else{
+            console.log("not in any enviornment")
+        }  
+      
+      }else res.status(401).send({'error':'User not authenticated to delete this transaction !'})   
+
+    }else res.status(401).send({'error':'Transaction does not exist'}) 
   
 });
 
-  // let query1=db.query(sql2,(err,result)=>{
-  //   console.log(result);
-  //   console.log("-->"+result[0].uuid);
-  //   console.log("-->"+req.headers.uuid) ;
-  //   if(result[0].uuid == req.headers.uuid){
-  //     let query = db.query(sql1,(err,results)=>{
-  //       if(results.length!=0){
-
-  //         res.status(200).send({'result': results})
-      
-  //       }else res.status(401).send({'error':'No attachments for this transaction !'}) 
-  //     })
-  //   }  
-
-  //   else res.status(401).send({'error':'User not authenticated to get the attachments !'})
-      
-  // });
   
 });
 
@@ -416,9 +449,9 @@ let login=require('./routes/login');
 app.use('/login',login);
 
 //Start Server
-app.listen('3030',()=>{
-  console.log('Server started on 3030')
+app.listen('3000',()=>{
+  console.log('Server started on 3000')
 });
-
+  
 
 
