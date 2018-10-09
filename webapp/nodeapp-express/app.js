@@ -354,7 +354,7 @@ app.delete('/transaction/:tid/attachments/:aid',(req,res)=>{
         var nameString = url;          
         console.log(process.env.NODENV)
         if(process.env.NODENV === "Prod"){
-
+          
         }
       }
     }else res.status(401).send({'error':'User not authenticated to delete this transaction !'})   
