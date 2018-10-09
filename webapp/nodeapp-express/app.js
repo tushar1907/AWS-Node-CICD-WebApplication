@@ -246,9 +246,9 @@ app.post('/transaction/:tid/attachments',(req,res)=>{
   let sql1="SELECT * from `transaction` where `tid`='"+req.params.tid+"'";
   let query1=db.query(sql1,(err,result)=>{
     //console.log("------>"+result);    
-    if(result[0].uuid == req.headers.uuid){
+    if(result.length!=0){
 
-      if(result.length!=0){
+      if(result[0].uuid == req.headers.uuid){
         
         if(url){
           var nameString = url;          
@@ -303,12 +303,11 @@ app.post('/transaction/:tid/attachments',(req,res)=>{
           res.status(400).send({'error':err,'result':"Url fields are missing or null !"})
         }
 
-      }else res.status(401).send({'error':'Transaction does not exist'})      
+      }else res.status(401).send({'error':'User not authenticated to delete this transaction !'})   
 
     }  
-    else{
-      res.status(401).send({'error':'User not authenticated to delete this transaction !'})
-    }  
+    else res.status(401).send({'error':'Transaction does not exist'})     
+     
   });
   
 });
@@ -318,6 +317,9 @@ app.get('/transaction/:tid/attachments',(req,res)=>{
   let url = req.body.url;  
   let sql1="SELECT * from `attachment` where `tid`='"+req.params.tid+"'";
   let sql2="SELECT * from `transaction` where `tid`='"+req.params.tid+"'"
+
+  
+
   let query1=db.query(sql2,(err,result)=>{
     console.log(result);
     console.log("-->"+result[0].uuid);
@@ -337,6 +339,51 @@ app.get('/transaction/:tid/attachments',(req,res)=>{
   });
   
 });
+
+//Delete sepecific Attachment related to this transaction
+app.delete('/transaction/:tid/attachments/:aid',(req,res)=>{   
+  let sql1="SELECT * from `attachment` where `tid`='"+req.params.tid+"'";
+  let sql2="SELECT * from `transaction` where `tid`='"+req.params.tid+"'"
+
+  let query1=db.query(sql2,(err,result)=>{
+    if(result.length!=0){
+
+      if(result[0].uuid == req.headers.uuid){
+      
+      if(url){
+        var nameString = url;          
+        console.log(process.env.NODENV)
+        if(process.env.NODENV === "Prod"){
+
+        }
+      }
+    }else res.status(401).send({'error':'User not authenticated to delete this transaction !'})   
+
+  }else res.status(401).send({'error':'Transaction does not exist'}) 
+  
+});
+
+  let query1=db.query(sql2,(err,result)=>{
+    console.log(result);
+    console.log("-->"+result[0].uuid);
+    console.log("-->"+req.headers.uuid) ;
+    if(result[0].uuid == req.headers.uuid){
+      let query = db.query(sql1,(err,results)=>{
+        if(results.length!=0){
+
+          res.status(200).send({'result': results})
+      
+        }else res.status(401).send({'error':'No attachments for this transaction !'}) 
+      })
+    }  
+
+    else res.status(401).send({'error':'User not authenticated to get the attachments !'})
+      
+  });
+  
+});
+
+
 
 //Update Attachments related to this transaction
 app.put('/transaction/:tid/attachments',(req,res)=>{   
