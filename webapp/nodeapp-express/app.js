@@ -303,9 +303,8 @@ app.post('/transaction/:tid/attachments',(req,res)=>{
           }         
 
         }
-        else{
-          res.status(400).send({'error':err,'result':"Url fields are missing or null !"})
-        }
+        else res.status(400).send({'error':err,'result':"Url fields are missing or null !"})
+        
 
       }else res.status(401).send({'error':'User not authenticated to delete this transaction !'})   
 
@@ -369,7 +368,10 @@ app.delete('/transaction/:tid/attachments/:aid',(req,res)=>{
                     let sql3="DELETE from `attachment` where `aid`='"+req.params.aid+"'";
                     let query1=db.query(sql3,(err,result1)=>{
                       if (err) throw err;
-                      res.status(204).send("Attachment successfully deleted")                      
+                      
+                      
+                      
+                      
                     });
                   }
                   else res.status(401).send({"error": err,"result":"You do not have permission to delete file in S3 !"});
@@ -415,26 +417,104 @@ app.delete('/transaction/:tid/attachments/:aid',(req,res)=>{
 
 
 //Update Attachments related to this transaction
-app.put('/transaction/:tid/attachments',(req,res)=>{   
-  let sql1="SELECT * from `attachment` where `tid`='"+req.params.tid+"'";
+app.put('/transaction/:tid/attachments/:aid',(req,res)=>{   
+  console.log("Test1")
+  var url = req.body.url
   let sql2="SELECT * from `transaction` where `tid`='"+req.params.tid+"'"
   let query1=db.query(sql2,(err,result)=>{
-    console.log(result);
-    console.log("-->"+result[0].uuid);
-    console.log("-->"+req.headers.uuid) ;
-    if(result[0].uuid == req.headers.uuid){
-      let query = db.query(sql1,(err,results)=>{
-        if(results.length!=0){
+    if(result.length!=0){
 
-          res.status(200).send({'result': results})
-      
-        }else res.status(401).send({'error':'No attachments for this transaction !'}) 
-      })
-    }  
+      if(result[0].uuid == req.headers.uuid){            
+        
+        if(url){          
+              
+                if(process.env.NODENV === "Prod"){
+                    let sql1="SELECT * from `attachment` where `aid`='"+req.params.aid+"'";
+                    let query1=db.query(sql1,(err,result1)=>{
+                      if(err) throw err
+                      
+                      if(result1.length!=0){               
+                        var filename = result1[0].url.split("/").pop();
+                        let s3 = new AWS.S3({
+                          accessKeyId: 'AKIAIFAMY56VUNAGXVGA',
+                          secretAccessKey: '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',
+                          Bucket: 'nodes3attachments',
+                        });
+                        var params = {
+                            Bucket: 'nodes3attachments',
+                            Key: filename,                            
+                        };
+                        s3.deleteObject(params, function (err, data) {
+                          if(err) throw err
+                          if (data) {
+                            let sql3="DELETE from `attachment` where `aid`='"+req.params.aid+"'";
+                            let query1=db.query(sql3,(err,result1)=>{
+                              if (err) throw err;
+                              var filename = url.split("/").pop();
+                              fs.readFile(url, (err, data) => {
+                                console.log(data)
+                                if (err) throw err;
+                                const params = {
+                                    Bucket: 'nodes3attachments', // pass your bucket name
+                                    Key: filename, // file will be saved as testBucket/contacts.csv
+                                    Body: data,
+                                    ACL: 'public-read'
+                                };
+                                s3.upload(params, function(s3Err, data) {
+                                    if (s3Err) throw s3Err                    
+                                    let saveUuid = uuid()
+                                    console.log("Attachment ID------>" + saveUuid);
+                                    let sql2="insert into `attachment` (`aid`,`url`,`tid`)values('"+saveUuid+"','"+data.Location+"','"+req.params.tid+"')";
+                                    let query2=db.query(sql2,(err,result)=>{
+                                    res.status(201).send({'error':err,'result':"Attachment for the transaction saved successfully!"})
+                                    });
 
-    else res.status(401).send({'error':'User not authenticated to get the attachments !'})
+                                });
+                              }); 
+
+                            });
+                          }
+                          else res.status(401).send({"error": err,"result":"You do not have permission to delete file in S3 !"});
+                          
+                        });
+                      }else res.status(401).send({'error':err,'result':"This specific attachment does not exist"})             
+                    });            
+                  }
+
+                    else if(process.env.NODENV === "Dev"){
+                        console.log("In the development enviornment")                 
+                        let sql1="SELECT * from `attachment` where `aid`='"+req.params.aid+"'";
+                        let query1=db.query(sql1,(err,result1)=>{ 
+                            if(err) throw err
+                            if(result1.length!==0){
+                              var filename = 'save/' + result1[0].url.split("/").pop();
+                              fs.unlink(filename, (err) => {
+                                if (err) throw err;
+                                else{
+                                  let sql3="DELETE from `attachment` where `aid`='"+req.params.aid+"'";
+                                  let query1=db.query(sql3,(err,result1)=>{
+                                    if (err) throw err;
+                                    res.status(204).send("Attachment successfully deleted");
+                                  });
+                                }                   
+                              });
+                            }
+                        }); 
+                        
+                    }else{
+                    console.log("not in any enviornment")
+                }  
+
+              }
+            else res.status(400).send({'error':err,'result':"Url fields are missing or null !"})
       
-  });
+      
+      }else res.status(401).send({'error':'User not authenticated to delete this transaction !'})   
+
+    }else res.status(401).send({'error':'Transaction does not exist'}) 
+  
+});
+
   
 });
 
