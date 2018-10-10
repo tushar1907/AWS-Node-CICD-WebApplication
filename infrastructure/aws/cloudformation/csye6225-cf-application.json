@@ -45,10 +45,13 @@
           "Type" : "AWS::EC2::SecurityGroup",
           "Properties" : {
              "GroupName" : "csye6225-rds",
-             "GroupDescription" : "allow TCP traffic on 3306",
+             "GroupDescription" : "allow TCP traffic on 3306 only from SGweb",
              "VpcId" : {"Fn::ImportValue" : "csye6225-Networking-vpc"},
              "SecurityGroupIngress" : [{
-                   "SourceSecurityGroupId" : { "Ref" : "csye6225-webapp" }
+              "IpProtocol" : "tcp",
+              "FromPort" : 3306,
+              "ToPort" : 3306,
+                   "SourceSecurityGroupId" : { "Ref" : "SGweb" }
                 }
           ]
              
