@@ -466,7 +466,7 @@ app.put('/transaction/:tid/attachments/:aid',(req,res)=>{
                                     console.log("Attachment ID------>" + saveUuid);
                                     let sql2="insert into `attachment` (`aid`,`url`,`tid`)values('"+saveUuid+"','"+data.Location+"','"+req.params.tid+"')";
                                     let query2=db.query(sql2,(err,result)=>{
-                                    res.status(201).send({'error':err,'result':"Attachment for the transaction saved successfully!"})
+                                    res.status(201).send({'error':err,'result':"New attachment for the transaction saved successfully!"})
                                     });
 
                                 });
@@ -494,7 +494,17 @@ app.put('/transaction/:tid/attachments/:aid',(req,res)=>{
                                   let sql3="DELETE from `attachment` where `aid`='"+req.params.aid+"'";
                                   let query1=db.query(sql3,(err,result1)=>{
                                     if (err) throw err;
-                                    res.status(204).send("Attachment successfully deleted");
+                                    var filename = 'save/'+ url.split("/").pop();
+                                    fs.copyFile(url, filename, (err) => {
+                                      if (err) throw err;
+                                      console.log('source.txt was copied to destination');            
+                                    });        
+                                    let saveUuid = uuid()
+                                    console.log("Attachment ID------>" + saveUuid);
+                                    let sql2="insert into `attachment` (`aid`,`url`,`tid`)values('"+saveUuid+"','"+filename+"','"+req.params.tid+"')";
+                                    let query2=db.query(sql2,(err,result)=>{
+                                    res.status(201).send({'error':err,'result':"New attachment for the transaction saved successfully!"})
+                                    });
                                   });
                                 }                   
                               });
