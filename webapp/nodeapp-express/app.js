@@ -244,16 +244,14 @@ app.put('/transaction/:id',(req,res)=>{
 app.post('/transaction/:tid/attachments',(req,res)=>{   
   let url = req.body.url;  
   let sql1="SELECT * from `transaction` where `tid`='"+req.params.tid+"'";
-  let query1=db.query(sql1,(err,result)=>{
-    //console.log("------>"+result);    
+  let query1=db.query(sql1,(err,result)=>{    
     if(result.length!=0){
 
       if(result[0].uuid == req.headers.uuid){
         
         if(url){
-          var nameString = url;          
-          console.log(process.env.NODENV)
-
+          var nameString = url; 
+          
           if(process.env.NODENV === "Prod"){
             console.log("In the production enviornment")
             let s3 = new AWS.S3({
@@ -262,7 +260,7 @@ app.post('/transaction/:tid/attachments',(req,res)=>{
               Bucket: 'nodes3attachments',
             });
             
-              const fileName = url;
+              
               var filename = nameString.split("/").pop();
               fs.readFile(url, (err, data) => {
                 console.log(data)
@@ -274,9 +272,7 @@ app.post('/transaction/:tid/attachments',(req,res)=>{
                     ACL: 'public-read'
                 };
                 s3.upload(params, function(s3Err, data) {
-                    if (s3Err) throw s3Err
-                    //res.send({'location': data})
-                    //console.log("location -----> " + data.Location)
+                    if (s3Err) throw s3Err                    
                     let saveUuid = uuid()
                     console.log("Attachment ID------>" + saveUuid);
                     let sql2="insert into `attachment` (`aid`,`url`,`tid`)values('"+saveUuid+"','"+data.Location+"','"+req.params.tid+"')";
@@ -326,14 +322,10 @@ app.get('/transaction/:tid/attachments',(req,res)=>{
   let sql1="SELECT * from `attachment` where `tid`='"+req.params.tid+"'";
   let sql2="SELECT * from `transaction` where `tid`='"+req.params.tid+"'"; 
 
-  let query1=db.query(sql2,(err,result)=>{
-    console.log(result);
-    console.log("-->"+result[0].uuid);
-    console.log("-->"+req.headers.uuid) ;
+  let query1=db.query(sql2,(err,result)=>{    
     if(result[0].uuid == req.headers.uuid){
       let query = db.query(sql1,(err,results)=>{
-        if(results.length!=0){
-          // console.log("result 1---->>" + results[0].url);
+        if(results.length!=0){          
           res.status(200).send({'result': results})
       
         }else res.status(401).send({'error':'No attachments for this transaction !'}) 
@@ -350,22 +342,18 @@ app.get('/transaction/:tid/attachments',(req,res)=>{
 app.delete('/transaction/:tid/attachments/:aid',(req,res)=>{   
   
   let sql2="SELECT * from `transaction` where `tid`='"+req.params.tid+"'"
-
   let query1=db.query(sql2,(err,result)=>{
     if(result.length!=0){
 
-      if(result[0].uuid == req.headers.uuid){       
-             
-        console.log(process.env.NODENV)
+      if(result[0].uuid == req.headers.uuid){            
+        
         if(process.env.NODENV === "Prod"){
             let sql1="SELECT * from `attachment` where `aid`='"+req.params.aid+"'";
             let query1=db.query(sql1,(err,result1)=>{
               if(err) throw err
-              console.log("result 1---->>" + result1[0].url);
-              if(result1.length!=0){
-                console.log('url is ----> '+ result1[0].url)
+              
+              if(result1.length!=0){               
                 var filename = result1[0].url.split("/").pop();
-                console.log("File name is==----->> "+ filename);
                 let s3 = new AWS.S3({
                   accessKeyId: 'AKIAIFAMY56VUNAGXVGA',
                   secretAccessKey: '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',
@@ -378,31 +366,39 @@ app.delete('/transaction/:tid/attachments/:aid',(req,res)=>{
                 s3.deleteObject(params, function (err, data) {
                   if(err) throw err
                   if (data) {
-                      console.log("File deleted successfully");
+                    let sql3="DELETE from `attachment` where `aid`='"+req.params.aid+"'";
+                    let query1=db.query(sql3,(err,result1)=>{
+                      if (err) throw err;
+                      res.status(204).send("Attachment successfully deleted")                      
+                    });
                   }
-                  else {
-                      console.log("Check if you have sufficient permissions : "+err);
-                  }
+                  else res.status(401).send({"error": err,"result":"You do not have permission to delete file in S3 !"});
+                  
                 });
               }else res.status(401).send({'error':err,'result':"This specific attachment does not exist"})             
             });            
-        }
+          }
 
-        else if(process.env.NODENV === "Dev"){
-            console.log("In the development enviornment")
-            var filename = 'save/'+ nameString.split("/").pop();
-            let sql1="SELECT * from `attachment` where `aid`='"+req.params.aid+"'";
-            let query1=db.query(sql1,(err,result1)=>{ 
-                if(err) throw err
-                if(result1.length!==0){
-                  var filename = 'save/' + result1[0].url.split("/").pop();
-                  fs.unlink(filename, (err) => {
-                    if (err) throw err;
-                    console.log('File deleted successully from dev enviornment save folder !');
-                  });
-                }
-            }); 
-            
+            else if(process.env.NODENV === "Dev"){
+                console.log("In the development enviornment")                 
+                let sql1="SELECT * from `attachment` where `aid`='"+req.params.aid+"'";
+                let query1=db.query(sql1,(err,result1)=>{ 
+                    if(err) throw err
+                    if(result1.length!==0){
+                      var filename = 'save/' + result1[0].url.split("/").pop();
+                      fs.unlink(filename, (err) => {
+                        if (err) throw err;
+                        else{
+                          let sql3="DELETE from `attachment` where `aid`='"+req.params.aid+"'";
+                          let query1=db.query(sql3,(err,result1)=>{
+                            if (err) throw err;
+                            res.status(204).send("Attachment successfully deleted");
+                          });
+                        }                   
+                      });
+                    }
+                }); 
+                
             }else{
             console.log("not in any enviornment")
         }  
