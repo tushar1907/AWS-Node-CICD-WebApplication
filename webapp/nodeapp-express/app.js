@@ -254,11 +254,7 @@ app.post('/transaction/:tid/attachments',(req,res)=>{
           
           if(process.env.NODENV === "Prod"){
             console.log("In the production enviornment")
-            let s3 = new AWS.S3({
-              accessKeyId: 'AKIAIFAMY56VUNAGXVGA',
-              secretAccessKey: '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',
-              Bucket: 'nodes3attachments',
-            });
+            let s3 = new AWS.S3(process.emit.key);
             
               
               var filename = nameString.split("/").pop();
@@ -353,11 +349,7 @@ app.delete('/transaction/:tid/attachments/:aid',(req,res)=>{
               
               if(result1.length!=0){               
                 var filename = result1[0].url.split("/").pop();
-                let s3 = new AWS.S3({
-                  accessKeyId: 'AKIAIFAMY56VUNAGXVGA',
-                  secretAccessKey: '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',
-                  Bucket: 'nodes3attachments',
-                });
+                  let s3 = new AWS.S3(process.emit.key);
                 var params = {
                     Bucket: 'nodes3attachments',
                     Key: filename
