@@ -254,11 +254,7 @@ app.post('/transaction/:tid/attachments',(req,res)=>{
           
           if(process.env.NODENV === "Prod"){
             console.log("In the production enviornment")
-            let s3 = new AWS.S3({
-              accessKeyId: 'AKIAIFAMY56VUNAGXVGA',
-              secretAccessKey: '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',
-              Bucket: 'nodes3attachments',
-            });
+            let s3 = new AWS.S3(process.emit.key);
             
               
               var filename = nameString.split("/").pop();
@@ -353,11 +349,7 @@ app.delete('/transaction/:tid/attachments/:aid',(req,res)=>{
               
               if(result1.length!=0){               
                 var filename = result1[0].url.split("/").pop();
-                let s3 = new AWS.S3({
-                  accessKeyId: 'AKIAIFAMY56VUNAGXVGA',
-                  secretAccessKey: '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',
-                  Bucket: 'nodes3attachments',
-                });
+                  let s3 = new AWS.S3(process.emit.key);
                 var params = {
                     Bucket: 'nodes3attachments',
                     Key: filename
@@ -466,7 +458,7 @@ app.put('/transaction/:tid/attachments/:aid',(req,res)=>{
                                     console.log("Attachment ID------>" + saveUuid);
                                     let sql2="insert into `attachment` (`aid`,`url`,`tid`)values('"+saveUuid+"','"+data.Location+"','"+req.params.tid+"')";
                                     let query2=db.query(sql2,(err,result)=>{
-                                    res.status(201).send({'error':err,'result':"Attachment for the transaction saved successfully!"})
+                                    res.status(201).send({'error':err,'result':"New attachment for the transaction saved successfully!"})
                                     });
 
                                 });
@@ -494,7 +486,17 @@ app.put('/transaction/:tid/attachments/:aid',(req,res)=>{
                                   let sql3="DELETE from `attachment` where `aid`='"+req.params.aid+"'";
                                   let query1=db.query(sql3,(err,result1)=>{
                                     if (err) throw err;
-                                    res.status(204).send("Attachment successfully deleted");
+                                    var filename = 'save/'+ url.split("/").pop();
+                                    fs.copyFile(url, filename, (err) => {
+                                      if (err) throw err;
+                                      console.log('source.txt was copied to destination');            
+                                    });        
+                                    let saveUuid = uuid()
+                                    console.log("Attachment ID------>" + saveUuid);
+                                    let sql2="insert into `attachment` (`aid`,`url`,`tid`)values('"+saveUuid+"','"+filename+"','"+req.params.tid+"')";
+                                    let query2=db.query(sql2,(err,result)=>{
+                                    res.status(201).send({'error':err,'result':"New attachment for the transaction saved successfully!"})
+                                    });
                                   });
                                 }                   
                               });
