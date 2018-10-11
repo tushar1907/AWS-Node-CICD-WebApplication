@@ -9,6 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "aws-sdk": "^2.329.0",
     "bcrypt": "^1.0.3",
     "body-parser": "^1.18.2",
     "connect-flash": "^0.1.1",
@@ -17,8 +18,11 @@
     "express-messages": "^1.0.1",
     "express-session": "^1.15.6",
     "express-validator": "^4.3.0",
-    "mysql": "^2.15.0",
+    "mysql": "^2.16.0",
     "nodemon": "^1.18.4",
     "uuid": "^3.3.2"
+  },
+  "devDependencies": {
+    "dotenv": "^6.0.0"
   }
 }

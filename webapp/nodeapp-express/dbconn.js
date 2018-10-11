@@ -6,7 +6,7 @@ module.exports=function(){
       host:'localhost',
       user:'root',
       password:'qqXtrp%5gMtr',
-      database:'nodemysql'
+     database:'nodemysql'
     });
   }
   return db;
