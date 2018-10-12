@@ -5,7 +5,7 @@ module.exports=function(){
     db=mysql.createConnection({
       host:'localhost',
       user:'root',
-      password:'May#1991',
+      password:'qqXtrp%5gMtr',
      database:'nodemysql'
     });
   }
