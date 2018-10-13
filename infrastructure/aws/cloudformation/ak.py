@@ -13,3 +13,16 @@ from apps.labs.module04.I2CSenseHatAdaptor import I2CSenseHatAdaptor
 while (True):
     sleep(5)
     pass
+
+    appa
+    appa
+    appa
+    appa
+    appa
+    appa
+    appagit 
+    appa
+    appa
+    appa
+
+    app
