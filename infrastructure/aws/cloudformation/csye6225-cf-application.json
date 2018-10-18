@@ -61,7 +61,7 @@
           "Type" : "AWS::EC2::Instance",
           "Properties" : {
              "ImageId" : "ami-9887c6e7",
-             "KeyName" : "EC2",
+             "KeyName" : "csye6225keyPair",
              "AvailabilityZone" : "us-east-1a",
              "InstanceType" : "t2.micro",
              "SubnetId" : {"Fn::ImportValue" : "csye6225-public-subnet-1"},
@@ -105,7 +105,7 @@
       "s3Bucket" : {
         "Type" : "AWS::S3::Bucket",
         "Properties" : {
-          "BucketName" : "ccsye6225-fall2018-tushar19071991.me.csye6225.com"
+          "BucketName" : "ccsye6225-fall2018-sharmaha.csye6225.com"
         }
      },
      "myDBSubnetGroup" : {
