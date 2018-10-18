@@ -255,7 +255,7 @@ app.post('/transaction/:tid/attachments',(req,res)=>{
           if(process.env.NODENV === "Prod"){
             console.log("In the production enviornment")
             let s3 = new AWS.S3(process.emit.key);
-            
+            console.log(s3)
               
               var filename = nameString.split("/").pop();
               fs.readFile(url, (err, data) => {
@@ -360,8 +360,8 @@ app.delete('/transaction/:tid/attachments/:aid',(req,res)=>{
                     let sql3="DELETE from `attachment` where `aid`='"+req.params.aid+"'";
                     let query1=db.query(sql3,(err,result1)=>{
                       if (err) throw err;
-                      
-                      
+                      //res.send(201) 
+                      res.status(204).send("Attachment successfully deleted");                  
                       
                       
                     });
