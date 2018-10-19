@@ -8,12 +8,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/singhvika/csye6225-spring2018.git"
+    "url": "git+https://github.com/singhvika/csye6225-fall2018.git"
   },
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/singhvika/csye6225-spring2018/issues"
+    "url": "https://github.com/singhvika/csye6225-fall2018/issues"
   },
-  "homepage": "https://github.com/singhvika/csye6225-spring2018#readme"
+  "homepage": "https://github.com/singhvika/csye6225-fall2018#readme"
 }

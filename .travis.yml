@@ -18,20 +18,20 @@ after_success:
   - pwd
   - ls -ltr
   - mkdir codedeploy_artifact
-#   - cp csye6225-fall2018/infrastructure/aws/codedeploy/*.sh ./codedeploy_artifact/
-#   - cp csye6225-fall2018/infrastructure/aws/codedeploy/*.yml ./codedeploy_artifact/
-#   - cd csye6225-spring2018/
-#   - zip -r csye6225-spring2018.zip ./* >/dev/null
-#   - cp csye6225-spring2018.zip ./../codedeploy_artifact/
-#   - rm -rf csye6225-spring2018.zip
-#   - pwd
-#   - cd ..
-#   - cd codedeploy_artifact/
-#   - zip -r csye6225-spring2018-$TRAVIS_JOB_NUMBER.zip *.yml *.sh csye6225-spring2018.zip >/dev/null 2>&1
-#   - rm -rf csye6225-spring2018.zip *.yml *.sh
-#   - pwd
-#   - ls -lrt
-#   - cd ..
+  - cp csye6225-fall2018/infrastructure/aws/codedeploy/*.sh ./codedeploy_artifact/
+  - cp csye6225-fall2018/infrastructure/aws/codedeploy/*.yml ./codedeploy_artifact/
+  - cd csye6225-fall2018/
+  - zip -r csye6225-fall2018.zip ./* >/dev/null
+  - cp csye6225-fall2018.zip ./../codedeploy_artifact/
+  - rm -rf csye6225-fall2018.zip
+  - pwd
+  - cd ..
+  - cd codedeploy_artifact/
+  - zip -r csye6225-fall2018-$TRAVIS_JOB_NUMBER.zip *.yml *.sh csye6225-fall2018.zip >/dev/null 2>&1
+  - rm -rf csye6225-fall2018.zip *.yml *.sh
+  - pwd
+  - ls -lrt
+  - cd ..
 
 
 # deploy:
@@ -49,7 +49,7 @@ after_success:
 #   - provider: codedeploy
 #     access_key_id: $access_key_id
 #     bucket: $s3_bucket
-#     key: csye6225-spring2018-$TRAVIS_JOB_NUMBER.zip
+#     key: csye6225-fall2018-$TRAVIS_JOB_NUMBER.zip
 #     bundle_type: zip
 #     application: $application
 #     deployment_group: $deployment_group

@@ -254,19 +254,31 @@ app.post('/transaction/:tid/attachments',(req,res)=>{
           
           if(process.env.NODENV === "Prod"){
             console.log("In the production enviornment")
+<<<<<<< HEAD
             let s3 = new AWS.S3(process.emit.key);
-            
+=======
+            console.log(process.emit.key)
+            console.log(process.env.key)
+            let s3 = new AWS.S3({
+              accessKeyId: 'AKIAJJYTLMJRYPL2FK6A',
+              secretAccessKey: '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',
+              Bucket: 'csye6225-fall2018-sharmaha.me.csye6225.com',
+          });
+          // let s3 = new AWS.S3(process.env.key);
+>>>>>>> 09fc7b79ebcc1d7e8cc253800891f76af904c574
+            console.log(s3)
               
               var filename = nameString.split("/").pop();
               fs.readFile(url, (err, data) => {
                 console.log(data)
                 if (err) throw err;
                 const params = {
-                    Bucket: 'nodes3attachments', // pass your bucket name
+                    Bucket: 'csye6225-fall2018-sharmaha.me.csye6225.com', // pass your bucket name
                     Key: filename, // file will be saved as testBucket/contacts.csv
                     Body: data,
                     ACL: 'public-read'
                 };
+
                 s3.upload(params, function(s3Err, data) {
                     if (s3Err) throw s3Err                    
                     let saveUuid = uuid()
@@ -340,18 +352,24 @@ app.delete('/transaction/:tid/attachments/:aid',(req,res)=>{
   let query1=db.query(sql2,(err,result)=>{
     if(result.length!=0){
 
-      if(result[0].uuid == req.headers.uuid){            
-        
+      if(result[0].uuid == req.headers.uuid){       
+        console.log("Tushar")     
+        console.log(process.env.NODENV)
         if(process.env.NODENV === "Prod"){
+
             let sql1="SELECT * from `attachment` where `aid`='"+req.params.aid+"'";
             let query1=db.query(sql1,(err,result1)=>{
               if(err) throw err
               
               if(result1.length!=0){               
                 var filename = result1[0].url.split("/").pop();
-                  let s3 = new AWS.S3(process.emit.key);
+                  let s3 = new AWS.S3({
+                    accessKeyId: 'AKIAJJYTLMJRYPL2FK6A',
+                    secretAccessKey: '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',
+                    Bucket: 'csye6225-fall2018-sharmaha.me.csye6225.com',
+                });
                 var params = {
-                    Bucket: 'nodes3attachments',
+                    Bucket: 'csye6225-fall2018-sharmaha.me.csye6225.com',
                     Key: filename
                 };
                 s3.deleteObject(params, function (err, data) {
@@ -360,8 +378,13 @@ app.delete('/transaction/:tid/attachments/:aid',(req,res)=>{
                     let sql3="DELETE from `attachment` where `aid`='"+req.params.aid+"'";
                     let query1=db.query(sql3,(err,result1)=>{
                       if (err) throw err;
+<<<<<<< HEAD
+                      //res.send(201) 
+                      res.status(204).send("Attachment successfully deleted");                  
+=======
                       
-                      
+                      res.status(204).send("Attachment successfully deleted");
+>>>>>>> 09fc7b79ebcc1d7e8cc253800891f76af904c574
                       
                       
                     });
@@ -428,12 +451,12 @@ app.put('/transaction/:tid/attachments/:aid',(req,res)=>{
                       if(result1.length!=0){               
                         var filename = result1[0].url.split("/").pop();
                         let s3 = new AWS.S3({
-                          accessKeyId: 'AKIAIFAMY56VUNAGXVGA',
-                          secretAccessKey: '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',
-                          Bucket: 'nodes3attachments',
-                        });
+                          accessKeyId: 'AKIAJJYTLMJRYPL2FK6A',
+                          secretAccessKey: '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',
+                          Bucket: 'csye6225-fall2018-sharmaha.me.csye6225.com',
+                      });
                         var params = {
-                            Bucket: 'nodes3attachments',
+                            Bucket: 'csye6225-fall2018-sharmaha.me.csye6225.com',
                             Key: filename,                            
                         };
                         s3.deleteObject(params, function (err, data) {
@@ -447,7 +470,7 @@ app.put('/transaction/:tid/attachments/:aid',(req,res)=>{
                                 console.log(data)
                                 if (err) throw err;
                                 const params = {
-                                    Bucket: 'nodes3attachments', // pass your bucket name
+                                    Bucket: 'csye6225-fall2018-sharmaha.me.csye6225.com', // pass your bucket name
                                     Key: filename, // file will be saved as testBucket/contacts.csv
                                     Body: data,
                                     ACL: 'public-read'
