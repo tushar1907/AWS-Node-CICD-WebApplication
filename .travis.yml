@@ -7,7 +7,7 @@ script:
   - npm install
   #- npm install core-js -g
   - npm test
-  - cd nodeapp-express/
+  - cd webapp/nodeapp-express/
   - npm install
   - ls -lrt
   - pwd
