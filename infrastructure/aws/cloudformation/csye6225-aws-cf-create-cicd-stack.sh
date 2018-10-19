@@ -1,3 +1,6 @@
+#!/bin/bash
+#Variables
+
 stackname=$1
 
 domain=$(aws route53 list-hosted-zones --query HostedZones[0].Name --output text)
@@ -8,7 +11,11 @@ accid=$(aws sts get-caller-identity --output text --query 'Account')
 echo "AccountId: $accid"
 
 
+<<<<<<< HEAD
 createOutput=$(aws cloudformation create-stack --stack-name $stackname --capabilities CAPABILITY_NAMED_IAM --template-body file://csye6225-cf-cicd.json --parameters ParameterKey=s3domain,ParameterValue=$s3domain ParameterKey=accid,ParameterValue=$accid)
+=======
+createOutput=$(aws cloudformation create-stack --stack-name $stackname --capabilities CAPABILITY_NAMED_IAM --template-body file://csye6225-cf-ci-cd.json --parameters ParameterKey=s3domain,ParameterValue=$s3domain ParameterKey=accid,ParameterValue=$accid)
+>>>>>>> c316b45f326448044429f9feb44dd00b32a752a6
 
 
 if [ $? -eq 0 ]; then
