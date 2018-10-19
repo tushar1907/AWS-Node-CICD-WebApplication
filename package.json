@@ -6,7 +6,7 @@
   "scripts": {
     "test": "mocha"
   },
-  "author": "singh.vika@husky.neu.edu",
+  "author": "csye-fall2018",
   "license": "ISC",
   "dependencies": {
     "bcrypt": "^1.0.3",
