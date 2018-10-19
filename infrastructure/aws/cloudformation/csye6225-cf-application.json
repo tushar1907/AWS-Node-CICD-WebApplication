@@ -105,7 +105,8 @@
       "s3Bucket" : {
         "Type" : "AWS::S3::Bucket",
         "Properties" : {
-          "BucketName" : "ccsye6225-fall2018-sharmaha.csye6225.com"
+          
+          "BucketName" : "csye6225-fall2018-anandak.me.csye6225.com"
         }
      },
      "myDBSubnetGroup" : {
