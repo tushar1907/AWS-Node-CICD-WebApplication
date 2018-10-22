@@ -11,7 +11,7 @@ script:
   - npm install
   - ls -lrt
   - pwd
-  - cd ../..
+  - cd ../../..
   - ls -lrt
 
 after_success:
