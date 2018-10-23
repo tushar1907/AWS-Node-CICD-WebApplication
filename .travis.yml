@@ -12,6 +12,7 @@ script:
   - ls -lrt
   - pwd
   - cd ../..
+  - cd ..
   - ls -lrt
 
 after_success:
@@ -44,7 +45,7 @@ deploy:
     secret_access_key: $secret_access_key
     wait-until-deployed: true
     on:
-      branch: Assignment-9
+      branch: Assignment-5
 
   - provider: codedeploy
     access_key_id: $access_key_id
@@ -57,7 +58,7 @@ deploy:
     secret_access_key: $secret_access_key
     wait-until-deployed: true
     on:
-      branch: Assignment-9
+      branch: Assignment-5
 
 
 # cache:
