@@ -106,6 +106,7 @@
         "Type" : "AWS::S3::Bucket",
         "Properties" : {
           
+
           "BucketName" : "csye6225-fall2018-tushar19071991.me.csye6225.com"
         }
      },

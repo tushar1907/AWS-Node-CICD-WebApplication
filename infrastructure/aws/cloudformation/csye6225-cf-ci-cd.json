@@ -209,7 +209,7 @@
                   "Action": [
                       "codedeploy:RegisterApplicationRevision",
                       "codedeploy:GetApplicationRevision"
-                  ],
+                  ],    
                   "Resource": [
                        {"Fn::Join" : ["",["arn:aws:codedeploy:us-east-1:",{"Ref" : "accid"},":application:csye6225CodeDeployApplication"]]}
                   ]
