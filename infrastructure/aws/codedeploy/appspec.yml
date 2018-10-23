@@ -8,12 +8,12 @@ hooks:
   AfterInstall:
    - location: ./afterInstall.sh
      timeout: 180
-     runas: ubuntu
+     runas: centos
   ApplicationStart:
    - location: ./applicationStart.sh
      timeout: 180
-     runas: ubuntu
+     runas: centos
   ValidateService:
    - location: ./validateService.sh
      timeout: 180
-     runas: ubuntu
+     runas: centos
