@@ -254,9 +254,6 @@ app.post('/transaction/:tid/attachments',(req,res)=>{
           
           if(process.env.NODENV === "Prod"){
             console.log("In the production enviornment")
-<<<<<<< HEAD
-            let s3 = new AWS.S3(process.emit.key);
-=======
             console.log(process.emit.key)
             console.log(process.env.key)
             let s3 = new AWS.S3({
@@ -265,7 +262,6 @@ app.post('/transaction/:tid/attachments',(req,res)=>{
               Bucket: 'csye6225-fall2018-sharmaha.me.csye6225.com',
           });
           // let s3 = new AWS.S3(process.env.key);
->>>>>>> 09fc7b79ebcc1d7e8cc253800891f76af904c574
             console.log(s3)
               
               var filename = nameString.split("/").pop();
@@ -378,13 +374,8 @@ app.delete('/transaction/:tid/attachments/:aid',(req,res)=>{
                     let sql3="DELETE from `attachment` where `aid`='"+req.params.aid+"'";
                     let query1=db.query(sql3,(err,result1)=>{
                       if (err) throw err;
-<<<<<<< HEAD
-                      //res.send(201) 
-                      res.status(204).send("Attachment successfully deleted");                  
-=======
                       
                       res.status(204).send("Attachment successfully deleted");
->>>>>>> 09fc7b79ebcc1d7e8cc253800891f76af904c574
                       
                       
                     });

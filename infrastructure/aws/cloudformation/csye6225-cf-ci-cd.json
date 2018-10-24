@@ -1,9 +1,19 @@
 {
   "AWSTemplateFormatVersion" : "2010-09-09",
-  "Description" : "IAM Policy and roles for EC2,CodeDeploy and TravisCI : CD-CI Stack",
+  "Description" : "IAM Policy and roles for EC2,CodeDeploy and TravisCI : CICD Stack",
   "Parameters" : {
     "s3domain" : {
       "Description" : "S3 Bucket Name",
+      "Type" : "String"
+
+    },
+    "appname" : {
+      "Description" : "Application Name",
+      "Type" : "String"
+
+    },
+    "depname" : {
+      "Description" : "Deployment Group Name",
       "Type" : "String"
 
     },
@@ -25,64 +35,6 @@
         "InstanceProfileName":"EC2ToS3BucketInstanceProfile"
       }
     },
-    "EC2ToSNSPolicy" :{
-      "Type" : "AWS::IAM::ManagedPolicy",
-      "Properties" : {
-        "ManagedPolicyName" : "EC2ToSNSPolicy",
-        "PolicyDocument" : {
-          "Version": "2012-10-17",
-          "Statement": [
-        {
-            "Effect": "Allow",
-            "Action": [
-                "SNS:Publish"
-            ],
-            "Resource": "*"
-        }
-    ]
-        },
-        "Roles" : [
-          {
-            "Ref" : "EC2ToS3BucketRole"
-          }
-        ]
-      }
-
-
-
-
-},
-    "EC2ToCloudWatchPolicy" : {
-    "Type" : "AWS::IAM::ManagedPolicy",
-    "Properties" : {
-      "ManagedPolicyName" : "EC2ToCloudWatchPolicy",
-      "PolicyDocument":{
-        "Version": "2012-10-17",
-        "Statement": [
-        {
-            "Effect": "Allow",
-            "Action": [
-                "logs:CreateLogGroup",
-                "logs:CreateLogStream",
-                "logs:PutLogEvents",
-                "logs:DescribeLogStreams"
-            ],
-            "Resource": [
-                "arn:aws:logs:::*"
-            ]
-        }
-    ]
-
-      },
-      "Roles" : [
-        {
-          "Ref" : "EC2ToS3BucketRole"
-        }
-      ]
-
-    }
-
-},
     "EC2ToS3BucketPolicy" : {
       "Type" : "AWS::IAM::ManagedPolicy",
       "Properties" : {
@@ -112,7 +64,6 @@
     "EC2ToS3BucketRole" : {
       "Type" : "AWS::IAM::Role",
       "Properties" : {
-        "ManagedPolicyArns" : ["arn:aws:iam::aws:policy/CloudWatchAgentAdminPolicy"],
         "AssumeRolePolicyDocument": {
           "Version" : "2012-10-17",
           "Statement" : [
@@ -209,7 +160,7 @@
                   "Action": [
                       "codedeploy:RegisterApplicationRevision",
                       "codedeploy:GetApplicationRevision"
-                  ],    
+                  ],
                   "Resource": [
                        {"Fn::Join" : ["",["arn:aws:codedeploy:us-east-1:",{"Ref" : "accid"},":application:csye6225CodeDeployApplication"]]}
                   ]
@@ -287,6 +238,25 @@
         {
           "BucketName" : {"Ref" : "s3domain"}
         }
+    },
+    "CodeDeployApplication": {
+      "Type": "AWS::CodeDeploy::Application",
+      "Properties": {
+        "ApplicationName" : {"Ref" : "appname"}
+      }
+    },
+     "CodeDeployDeploymentGroup": {
+      "Type": "AWS::CodeDeploy::DeploymentGroup",
+      "Properties": {
+        "ApplicationName" : {"Ref" : "appname"},
+        "Ec2TagFilters" : [{
+          "Key" : "Name",
+          "Value" : "MyEC2Instance",
+          "Type" : "KEY_AND_VALUE"
+        }],
+        "ServiceRoleArn" : {"Fn::GetAtt" : ["CodeDeployServiceRole", "Arn"]},
+        "DeploymentGroupName" : {"Ref" : "depname"}
+      }
     }
 },
     "Outputs" : {
