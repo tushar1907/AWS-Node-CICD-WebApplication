@@ -66,7 +66,7 @@
                           "sudo yum install ruby -y \n",
                           "sudo yum install wget -y \n",
                           "sudo yum install python -y \n",
-  
+                          "sudo yum install unzip \n",
                           "exec > >(tee /var/log/user-data.log|logger -t user-data -s 2>/dev/console) 2>&1 \n",
                           "curl -sL https://deb.nodesource.com/setup_9.x | sudo -E bash - \n",
                           "sudo yum install -y nodejs \n",
