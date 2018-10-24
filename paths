@@ -2,6 +2,7 @@
 
 ssh -i ~/Downloads/csye6225keypair.pem centos@34.201.249.0
 
+
 hooks:
   AfterInstall:
    - location: ./beforeInstall.sh
