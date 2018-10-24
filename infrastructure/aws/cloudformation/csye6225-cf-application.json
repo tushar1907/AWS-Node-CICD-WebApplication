@@ -62,15 +62,14 @@
                       [
                           "#!/bin/bash -xe \n",
                           "sudo yum update \n",
-                          "sudo yum openjdk-8-jdk -y\n",
+                          "sudo yum install java-1.8.0-openjdk\n",
                           "sudo yum install ruby -y \n",
                           "sudo yum install wget -y \n",
                           "sudo yum install python -y \n",
                           "sudo yum install unzip \n",
-                          "exec > >(tee /var/log/user-data.log|logger -t user-data -s 2>/dev/console) 2>&1 \n",
-                          "curl -sL https://deb.nodesource.com/setup_9.x | sudo -E bash - \n",
+                          "curl --silent --location https://rpm.nodesource.com/setup_9.x | sudo bash - \n",
                           "sudo yum install -y nodejs \n",
-                          "sudo yum install -y build-essential \n",
+                          "sudo yum groupinstall 'Development Tools' \n",
                           "sudo npm install pm2 -g \n",
   
                           "sudo yum update \n",
@@ -79,7 +78,7 @@
                           "sudo ./install auto \n",
                           "sudo service codedeploy-agent start \n",
                           "sudo service codedeploy-agent status \n",
-  
+                          "sudo su \n",
                           "sudo echo NODE_ENV=development > /var/.env \n",
                           "sudo echo DB_USER=csye6225master >> /var/.env \n",
                           "sudo echo DB_PASS=csye6225password >> /var/.env \n",
