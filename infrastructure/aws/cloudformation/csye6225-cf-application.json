@@ -70,8 +70,7 @@
                           "curl --silent --location https://rpm.nodesource.com/setup_9.x | sudo bash - \n",
                           "sudo yum install -y nodejs \n",
                           "sudo yum groupinstall 'Development Tools' \n",
-                          "sudo npm install pm2 -g \n",
-  
+                          "sudo npm install pm2 -g \n",  
                           "sudo yum update \n",
                           "sudo wget https://aws-codedeploy-us-east-1.s3.amazonaws.com/latest/install \n",
                           "sudo chmod +x ./install \n",
