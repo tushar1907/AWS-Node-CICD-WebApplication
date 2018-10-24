@@ -8,7 +8,6 @@ if [ $? -eq 0 ]; then
 	echo "Creating stack..."
 	aws cloudformation wait stack-create-complete --stack-name $stackname
 	echo "Stack created successfully. Stack Id below: "
-
 	echo $createOutput
 
 else
