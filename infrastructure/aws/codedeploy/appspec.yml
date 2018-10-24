@@ -5,15 +5,15 @@ files:
   - source: ./csye6225-fall2018.zip
     destination: /var
 hooks:
+  BeforeInstall:
+   - location: ./beforeInstall.sh
+     timeout: 180
+     runas: centos
   AfterInstall:
    - location: ./afterInstall.sh
      timeout: 180
-     runas: ubuntu
+     runas: centos
   ApplicationStart:
    - location: ./applicationStart.sh
      timeout: 180
-     runas: ubuntu
-  ValidateService:
-   - location: ./validateService.sh
-     timeout: 180
-     runas: ubuntu
+     runas: centos
