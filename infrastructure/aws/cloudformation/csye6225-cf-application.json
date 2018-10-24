@@ -77,7 +77,7 @@
                             "./install auto \n",
                             "service codedeploy-agent start \n",
                             "service codedeploy-agent status \n",
-                            "echo NODE_ENV=development > /var/.env \n",
+                            "echo NODE_ENV=Prod > /var/.env \n",
                             "echo DB_USER=csye6225master >> /var/.env \n",
                             "echo DB_PASS=csye6225password >> /var/.env \n",
                             "echo DB_PORT=3306 >> /var/.env \n",
