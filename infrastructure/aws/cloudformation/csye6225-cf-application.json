@@ -62,6 +62,9 @@
                         [
                             "#!/bin/bash -xe \n",
                             "yum update -y \n",
+                            "yum install python -y \n",
+                            "yum install java-1.8.0-openjdk -y\n",
+                            "yum install ruby -y \n",
                             "yum install wget -y \n",
                             "yum install unzip -y \n",
                             "curl --silent --location https://rpm.nodesource.com/setup_9.x | sudo bash - \n",
