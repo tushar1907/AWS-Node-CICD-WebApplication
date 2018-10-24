@@ -1,1 +1,18 @@
 /opt/codedeploy-agent/deployment-root/072bb389-791b-460c-9921-612f2d5130d2/d-357EOT85W/logs
+hooks:
+  AfterInstall:
+   - location: ./beforeInstall.sh
+     timeout: 180
+     runas: centos
+  AfterInstall:
+   - location: ./afterInstall.sh
+     timeout: 180
+     runas: centos
+  ApplicationStart:
+   - location: ./applicationStart.sh
+     timeout: 180
+     runas: centos
+  ValidateService:
+   - location: ./validateService.sh
+     timeout: 180
+     runas: centos
