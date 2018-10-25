@@ -26,11 +26,11 @@ echo "#CSYE6225: doing after install: end"
 pwd
 ls -lrt
 cd ..
-sudo cp .env webapp/nodeapp-express
-cd webapp/nodeapp-express
+sudo cp .env webapp/webapp/nodeapp-express
+cd webapp/webapp/nodeapp-express
 sudo chmod 666 .env
 pwd
 ls -lrt
-cd ../..
+cd ../../..
 pwd
 ls -lrt
