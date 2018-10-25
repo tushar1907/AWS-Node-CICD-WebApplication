@@ -319,7 +319,7 @@ app.post('/transaction/:tid/attachments',(req,res)=>{
                 console.log(data)
                 if (err) throw err;
                 const params = {
-                    Bucket: 'csye6225-fall2018-sharmaha.me.csye6225.com', // pass your bucket name
+                    Bucket: process.env.BUCKET, // pass your bucket name
                     Key: filename, // file will be saved as testBucket/contacts.csv
                     Body: data,
                     ACL: 'public-read'
@@ -416,7 +416,7 @@ app.delete('/transaction/:tid/attachments/:aid',(req,res)=>{
                 // });
                 let s3 = new AWS.S3(process.env.key);
                 var params = {
-                    Bucket: 'csye6225-fall2018-sharmaha.me.csye6225.com',
+                    Bucket: process.env.BUCKET,
                     Key: filename
                 };
                 s3.deleteObject(params, function (err, data) {
@@ -513,7 +513,7 @@ app.put('/transaction/:tid/attachments/:aid',(req,res)=>{
                                 console.log(data)
                                 if (err) throw err;
                                 const params = {
-                                    Bucket: 'csye6225-fall2018-sharmaha.me.csye6225.com', // pass your bucket name
+                                    Bucket: process.env.BUCKET, // pass your bucket name
                                     Key: filename, // file will be saved as testBucket/contacts.csv
                                     Body: data,
                                     ACL: 'public-read'
