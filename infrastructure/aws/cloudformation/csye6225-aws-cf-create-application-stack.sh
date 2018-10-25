@@ -21,7 +21,7 @@ iaminstance="EC2ToS3BucketInstanceProfile"
 echo "Instance Profile Name: $iaminstance"
 domain=$(aws route53 list-hosted-zones --query HostedZones[0].Name --output text)
 trimdomain=${domain::-1}
-s3domain="$domain+csy6225.com"
+s3domain="$trimdomain.csy6225.com"
 echo "S3 Domain: $s3domain"
 
 
