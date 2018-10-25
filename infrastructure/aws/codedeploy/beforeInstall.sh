@@ -1,7 +1,6 @@
 #!/bin/bash
 
-# change to tomcat webapps directory.
-# this directory will be different for different tomcat versions.
+# change to var directory.
 cd /var
 sudo rm -rf csye6225-fall2018.zip
 sudo rm -rf webapp
