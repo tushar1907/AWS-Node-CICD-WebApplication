@@ -1,6 +1,8 @@
 #!/bin/bash
 
+
 #unzipping the package and passing env file
+
 echo "#CSYE6225: doing after install"
 cd /var
 pwd
