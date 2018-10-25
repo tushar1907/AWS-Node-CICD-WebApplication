@@ -20,7 +20,12 @@ db.connect((err)=>{
   }
   console.log("Mysql connected!...");
 });
-console.log("Enviornment : " + process.env.NODENV)
+console.log("Enviornment : " + process.env.NODE_ENV)
+console.log("Enviornment : " + process.env.DB_PASS)
+console.log("Enviornment : " + process.env.DB_NAME)
+console.log("Enviornment : " + process.env.DB_HOST)
+console.log("Enviornment : " + process.env.DB_USER)
+
 
 const app=express();
 
@@ -252,16 +257,16 @@ app.post('/transaction/:tid/attachments',(req,res)=>{
         if(url){
           var nameString = url; 
           
-          if(process.env.NODENV === "Prod"){
+          if(process.env.NODE_ENV === "Prod"){
             console.log("In the production enviornment")
             console.log(process.emit.key)
             console.log(process.env.key)
-            let s3 = new AWS.S3({
-              accessKeyId: 'AKIAJJYTLMJRYPL2FK6A',
-              secretAccessKey: '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',
-              Bucket: 'csye6225-fall2018-sharmaha.me.csye6225.com',
-          });
-          // let s3 = new AWS.S3(process.env.key);
+          //   let s3 = new AWS.S3({
+          //     accessKeyId: 'AKIAJJYTLMJRYPL2FK6A',
+          //     secretAccessKey: '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',
+          //     Bucket: 'csye6225-fall2018-sharmaha.me.csye6225.com',
+          // });
+          let s3 = new AWS.S3(process.env.key);
             console.log(s3)
               
               var filename = nameString.split("/").pop();
@@ -288,7 +293,7 @@ app.post('/transaction/:tid/attachments',(req,res)=>{
              });            
 
           }
-          else if(process.env.NODENV === "Dev"){
+          else if(process.env.NODE_ENV === "Dev"){
 
             console.log("In the development enviornment")
             var filename = 'save/'+ nameString.split("/").pop();
@@ -350,8 +355,8 @@ app.delete('/transaction/:tid/attachments/:aid',(req,res)=>{
 
       if(result[0].uuid == req.headers.uuid){       
         console.log("Tushar")     
-        console.log(process.env.NODENV)
-        if(process.env.NODENV === "Prod"){
+        console.log(process.env.NODE_ENV)
+        if(process.env.NODE_ENV === "Prod"){
 
             let sql1="SELECT * from `attachment` where `aid`='"+req.params.aid+"'";
             let query1=db.query(sql1,(err,result1)=>{
@@ -359,11 +364,12 @@ app.delete('/transaction/:tid/attachments/:aid',(req,res)=>{
               
               if(result1.length!=0){               
                 var filename = result1[0].url.split("/").pop();
-                  let s3 = new AWS.S3({
-                    accessKeyId: 'AKIAJJYTLMJRYPL2FK6A',
-                    secretAccessKey: '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',
-                    Bucket: 'csye6225-fall2018-sharmaha.me.csye6225.com',
-                });
+                //   let s3 = new AWS.S3({
+                //     accessKeyId: 'AKIAJJYTLMJRYPL2FK6A',
+                //     secretAccessKey: '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',
+                //     Bucket: 'csye6225-fall2018-sharmaha.me.csye6225.com',
+                // });
+                let s3 = new AWS.S3(process.env.key);
                 var params = {
                     Bucket: 'csye6225-fall2018-sharmaha.me.csye6225.com',
                     Key: filename
@@ -387,7 +393,7 @@ app.delete('/transaction/:tid/attachments/:aid',(req,res)=>{
             });            
           }
 
-            else if(process.env.NODENV === "Dev"){
+            else if(process.env.NODE_ENV === "Dev"){
                 console.log("In the development enviornment")                 
                 let sql1="SELECT * from `attachment` where `aid`='"+req.params.aid+"'";
                 let query1=db.query(sql1,(err,result1)=>{ 
@@ -434,18 +440,19 @@ app.put('/transaction/:tid/attachments/:aid',(req,res)=>{
         
         if(url){          
               
-                if(process.env.NODENV === "Prod"){
+                if(process.env.NODE_ENV === "Prod"){
                     let sql1="SELECT * from `attachment` where `aid`='"+req.params.aid+"'";
                     let query1=db.query(sql1,(err,result1)=>{
                       if(err) throw err
                       
                       if(result1.length!=0){               
                         var filename = result1[0].url.split("/").pop();
-                        let s3 = new AWS.S3({
-                          accessKeyId: 'AKIAJJYTLMJRYPL2FK6A',
-                          secretAccessKey: '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',
-                          Bucket: 'csye6225-fall2018-sharmaha.me.csye6225.com',
-                      });
+                      //   let s3 = new AWS.S3({
+                      //     accessKeyId: 'AKIAJJYTLMJRYPL2FK6A',
+                      //     secretAccessKey: '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',
+                      //     Bucket: 'csye6225-fall2018-sharmaha.me.csye6225.com',
+                      // });
+                      let s3 = new AWS.S3(process.env.key);
                         var params = {
                             Bucket: 'csye6225-fall2018-sharmaha.me.csye6225.com',
                             Key: filename,                            
@@ -487,7 +494,7 @@ app.put('/transaction/:tid/attachments/:aid',(req,res)=>{
                     });            
                   }
 
-                    else if(process.env.NODENV === "Dev"){
+                    else if(process.env.NODE_ENV === "Dev"){
                         console.log("In the development enviornment")                 
                         let sql1="SELECT * from `attachment` where `aid`='"+req.params.aid+"'";
                         let query1=db.query(sql1,(err,result1)=>{ 
