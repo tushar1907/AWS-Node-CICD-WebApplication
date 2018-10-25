@@ -29,8 +29,32 @@ db.connect((err)=>{
         + 'PRIMARY KEY ( uuid )'
         +  ')', function (err) {
             if (err) throw err;
-            console.log("New Table created");
+            console.log("New USER Table created");
       });
+      db.query('create table IF NOT EXISTS transaction('
+        + 'tid varbinary(36) NOT NULL,'
+        + 'description varchar(45) DEFAULT NULL,'
+        + 'amount varchar(45) DEFAULT NULL,'
+        + 'category varchar(45) DEFAULT NULL,'
+        + 'merchant varchar(45) DEFAULT NULL,'
+        + 'date varchar(45) DEFAULT NULL,'
+        + 'uuid varbinary(36) NOT NULL,'
+        + 'PRIMARY KEY (`tid`)'
+        +  ')', function (err) {
+            if (err) throw err;
+            console.log("New TRANSACTION Table created");
+      });
+      db.query('create table IF NOT EXISTS attachment('
+        + 'aid varbinary(36) NOT NULL,'
+        + 'url varchar(255) DEFAULT NULL,'
+        + 'tid varbinary(36) DEFAULT NULL,'
+        + 'PRIMARY KEY ( aid ),'
+        + 'KEY tid_idx (tid),'
+        + 'CONSTRAINT tid FOREIGN KEY (tid) REFERENCES transaction (tid)'
+        +  ')', function (err) {
+            if (err) throw err;
+            console.log("New ATTACHMENTS Table created");
+      });      
     });
   });  
   console.log("Mysql connected!...");
@@ -182,7 +206,7 @@ app.post('/signup',(req,res)=>{
 });
 
 app.get('/transaction',(req,res)=>{
-  let q = "select * from `transaction`";
+  let q = "select * from `transaction` where `uuid`='"+req.headers.uuid+"'";
   let query2=db.query(q,(err,result)=>{
     res.status(200).send({'error':err,'result':result})    
   });
