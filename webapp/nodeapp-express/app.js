@@ -266,6 +266,7 @@ app.delete('/transaction/:id',(req,res)=>{
 
 
 app.put('/transaction/:id',(req,res)=>{  
+  
   console.log(req.params.id)
   if(req.params.id){
     let sql1="SELECT * from `transaction` where `tid`='"+req.params.id+"'";
