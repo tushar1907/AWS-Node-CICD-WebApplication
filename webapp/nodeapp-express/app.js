@@ -32,8 +32,7 @@ db.connect((err)=>{
             console.log("New Table created");
       });
     });
-  });
-  logger.info("Mysql connected!...");
+  });  
   console.log("Mysql connected!...");
 });
 
