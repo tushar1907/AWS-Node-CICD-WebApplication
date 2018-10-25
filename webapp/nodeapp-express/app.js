@@ -60,11 +60,6 @@ db.connect((err)=>{
   console.log("Mysql connected!...");
 });
 
-
-
-
-
-
 console.log("Enviornment : " + process.env.NODE_ENV)
 console.log("Enviornment : " + process.env.DB_PASS)
 console.log("Enviornment : " + process.env.DB_NAME)
@@ -410,11 +405,6 @@ app.delete('/transaction/:tid/attachments/:aid',(req,res)=>{
               
               if(result1.length!=0){               
                 var filename = result1[0].url.split("/").pop();
-                //   let s3 = new AWS.S3({
-                //     accessKeyId: 'AKIAJJYTLMJRYPL2FK6A',
-                //     secretAccessKey: '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',
-                //     Bucket: 'csye6225-fall2018-sharmaha.me.csye6225.com',
-                // });
                 let s3 = new AWS.S3(process.env.key);
                 var params = {
                     Bucket: process.env.BUCKET,
@@ -492,12 +482,6 @@ app.put('/transaction/:tid/attachments/:aid',(req,res)=>{
                       if(err) throw err
                       
                       if(result1.length!=0){               
-                        var filename = result1[0].url.split("/").pop();
-                      //   let s3 = new AWS.S3({
-                      //     accessKeyId: 'AKIAJJYTLMJRYPL2FK6A',
-                      //     secretAccessKey: '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',
-                      //     Bucket: 'csye6225-fall2018-sharmaha.me.csye6225.com',
-                      // });
                       let s3 = new AWS.S3(process.env.key);
                         var params = {
                             Bucket: 'csye6225-fall2018-sharmaha.me.csye6225.com',
