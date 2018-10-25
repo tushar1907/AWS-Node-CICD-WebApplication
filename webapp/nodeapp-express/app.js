@@ -18,9 +18,54 @@ db.connect((err)=>{
   if(err){
     throw err;
   }
+  db.query('CREATE DATABASE IF NOT EXISTS '+process.env.DB_NAME, function (err) {// create db if not exist
+    if (err) throw err;
+    db.query('USE '+process.env.DB_NAME, function (err) {
+      if (err) throw err;
+      db.query('create table IF NOT EXISTS user('
+        + 'uuid VARBINARY(36) NOT NULL,'
+        + 'username VARCHAR(255) DEFAULT NULL,'
+        + 'password VARCHAR(255) DEFAULT NULL,'
+        + 'PRIMARY KEY ( uuid )'
+        +  ')', function (err) {
+            if (err) throw err;
+            console.log("New USER Table created");
+      });
+      db.query('create table IF NOT EXISTS transaction('
+        + 'tid varbinary(36) NOT NULL,'
+        + 'description varchar(45) DEFAULT NULL,'
+        + 'amount varchar(45) DEFAULT NULL,'
+        + 'category varchar(45) DEFAULT NULL,'
+        + 'merchant varchar(45) DEFAULT NULL,'
+        + 'date varchar(45) DEFAULT NULL,'
+        + 'uuid varbinary(36) NOT NULL,'
+        + 'PRIMARY KEY (`tid`)'
+        +  ')', function (err) {
+            if (err) throw err;
+            console.log("New TRANSACTION Table created");
+      });
+      db.query('create table IF NOT EXISTS attachment('
+        + 'aid varbinary(36) NOT NULL,'
+        + 'url varchar(255) DEFAULT NULL,'
+        + 'tid varbinary(36) DEFAULT NULL,'
+        + 'PRIMARY KEY ( aid ),'
+        + 'KEY tid_idx (tid),'
+        + 'CONSTRAINT tid FOREIGN KEY (tid) REFERENCES transaction (tid)'
+        +  ')', function (err) {
+            if (err) throw err;
+            console.log("New ATTACHMENTS Table created");
+      });      
+    });
+  });  
   console.log("Mysql connected!...");
 });
-console.log("Enviornment : " + process.env.NODENV)
+
+console.log("Enviornment : " + process.env.NODE_ENV)
+console.log("Enviornment : " + process.env.DB_PASS)
+console.log("Enviornment : " + process.env.DB_NAME)
+console.log("Enviornment : " + process.env.DB_HOST)
+console.log("Enviornment : " + process.env.DB_USER)
+
 
 const app=express();
 
@@ -156,7 +201,7 @@ app.post('/signup',(req,res)=>{
 });
 
 app.get('/transaction',(req,res)=>{
-  let q = "select * from `transaction`";
+  let q = "select * from `transaction` where `uuid`='"+req.headers.uuid+"'";
   let query2=db.query(q,(err,result)=>{
     res.status(200).send({'error':err,'result':result})    
   });
@@ -216,6 +261,7 @@ app.delete('/transaction/:id',(req,res)=>{
 
 
 app.put('/transaction/:id',(req,res)=>{  
+  
   console.log(req.params.id)
   if(req.params.id){
     let sql1="SELECT * from `transaction` where `tid`='"+req.params.id+"'";
@@ -252,21 +298,29 @@ app.post('/transaction/:tid/attachments',(req,res)=>{
         if(url){
           var nameString = url; 
           
-          if(process.env.NODENV === "Prod"){
+          if(process.env.NODE_ENV === "Prod"){
             console.log("In the production enviornment")
-            let s3 = new AWS.S3(process.emit.key);
-            
+            console.log(process.emit.key)
+            console.log(process.env.key)
+          //   let s3 = new AWS.S3({
+          //     accessKeyId: 'AKIAJJYTLMJRYPL2FK6A',
+          //     secretAccessKey: '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',
+          //     Bucket: 'csye6225-fall2018-sharmaha.me.csye6225.com',
+          // });
+          let s3 = new AWS.S3(process.env.key);
+            console.log(s3)
               
               var filename = nameString.split("/").pop();
               fs.readFile(url, (err, data) => {
                 console.log(data)
                 if (err) throw err;
                 const params = {
-                    Bucket: 'nodes3attachments', // pass your bucket name
+                    Bucket: process.env.BUCKET, // pass your bucket name
                     Key: filename, // file will be saved as testBucket/contacts.csv
                     Body: data,
                     ACL: 'public-read'
                 };
+
                 s3.upload(params, function(s3Err, data) {
                     if (s3Err) throw s3Err                    
                     let saveUuid = uuid()
@@ -280,7 +334,7 @@ app.post('/transaction/:tid/attachments',(req,res)=>{
              });            
 
           }
-          else if(process.env.NODENV === "Dev"){
+          else if(process.env.NODE_ENV === "Dev"){
 
             console.log("In the development enviornment")
             var filename = 'save/'+ nameString.split("/").pop();
@@ -340,18 +394,20 @@ app.delete('/transaction/:tid/attachments/:aid',(req,res)=>{
   let query1=db.query(sql2,(err,result)=>{
     if(result.length!=0){
 
-      if(result[0].uuid == req.headers.uuid){            
-        
-        if(process.env.NODENV === "Prod"){
+      if(result[0].uuid == req.headers.uuid){       
+        console.log("Tushar")     
+        console.log(process.env.NODE_ENV)
+        if(process.env.NODE_ENV === "Prod"){
+
             let sql1="SELECT * from `attachment` where `aid`='"+req.params.aid+"'";
             let query1=db.query(sql1,(err,result1)=>{
               if(err) throw err
               
               if(result1.length!=0){               
                 var filename = result1[0].url.split("/").pop();
-                  let s3 = new AWS.S3(process.emit.key);
+                let s3 = new AWS.S3(process.env.key);
                 var params = {
-                    Bucket: 'nodes3attachments',
+                    Bucket: process.env.BUCKET,
                     Key: filename
                 };
                 s3.deleteObject(params, function (err, data) {
@@ -361,7 +417,7 @@ app.delete('/transaction/:tid/attachments/:aid',(req,res)=>{
                     let query1=db.query(sql3,(err,result1)=>{
                       if (err) throw err;
                       
-                      
+                      res.status(204).send("Attachment successfully deleted");
                       
                       
                     });
@@ -373,7 +429,7 @@ app.delete('/transaction/:tid/attachments/:aid',(req,res)=>{
             });            
           }
 
-            else if(process.env.NODENV === "Dev"){
+            else if(process.env.NODE_ENV === "Dev"){
                 console.log("In the development enviornment")                 
                 let sql1="SELECT * from `attachment` where `aid`='"+req.params.aid+"'";
                 let query1=db.query(sql1,(err,result1)=>{ 
@@ -420,20 +476,15 @@ app.put('/transaction/:tid/attachments/:aid',(req,res)=>{
         
         if(url){          
               
-                if(process.env.NODENV === "Prod"){
+                if(process.env.NODE_ENV === "Prod"){
                     let sql1="SELECT * from `attachment` where `aid`='"+req.params.aid+"'";
                     let query1=db.query(sql1,(err,result1)=>{
                       if(err) throw err
                       
                       if(result1.length!=0){               
-                        var filename = result1[0].url.split("/").pop();
-                        let s3 = new AWS.S3({
-                          accessKeyId: 'AKIAIFAMY56VUNAGXVGA',
-                          secretAccessKey: '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',
-                          Bucket: 'nodes3attachments',
-                        });
+                      let s3 = new AWS.S3(process.env.key);
                         var params = {
-                            Bucket: 'nodes3attachments',
+                            Bucket: 'csye6225-fall2018-sharmaha.me.csye6225.com',
                             Key: filename,                            
                         };
                         s3.deleteObject(params, function (err, data) {
@@ -447,7 +498,7 @@ app.put('/transaction/:tid/attachments/:aid',(req,res)=>{
                                 console.log(data)
                                 if (err) throw err;
                                 const params = {
-                                    Bucket: 'nodes3attachments', // pass your bucket name
+                                    Bucket: process.env.BUCKET, // pass your bucket name
                                     Key: filename, // file will be saved as testBucket/contacts.csv
                                     Body: data,
                                     ACL: 'public-read'
@@ -473,7 +524,7 @@ app.put('/transaction/:tid/attachments/:aid',(req,res)=>{
                     });            
                   }
 
-                    else if(process.env.NODENV === "Dev"){
+                    else if(process.env.NODE_ENV === "Dev"){
                         console.log("In the development enviornment")                 
                         let sql1="SELECT * from `attachment` where `aid`='"+req.params.aid+"'";
                         let query1=db.query(sql1,(err,result1)=>{ 

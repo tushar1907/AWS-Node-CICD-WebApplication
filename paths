@@ -1,0 +1,5 @@
+/opt/codedeploy-agent/deployment-root/072bb389-791b-460c-9921-612f2d5130d2/d-357EOT85W/logs
+
+ssh -i ~/Downloads/csye6225keypair.pem centos@34.201.249.0
+
+ec2-54-166-255-22.compute-1.amazonaws.com:80/api/transaction                
