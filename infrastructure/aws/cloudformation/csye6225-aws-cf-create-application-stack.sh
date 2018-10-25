@@ -21,18 +21,15 @@ iaminstance="EC2ToS3BucketInstanceProfile"
 echo "Instance Profile Name: $iaminstance"
 domain=$(aws route53 list-hosted-zones --query HostedZones[0].Name --output text)
 trimdomain=${domain::-1}
-s3domain="$trimdomain.csy6225.com"
-echo "S3 Domain: $s3domain"
-
+s3domain="$trimdomain.csye6225.com"
+echo "S3 Bucket: $s3domain"
 
 createOutput=$(aws cloudformation create-stack --stack-name $stackname --template-body file://csye6225-cf-application.json --parameters ParameterKey=stackname,ParameterValue=$stackname ParameterKey=dbsubnet,ParameterValue=$dbsubnet ParameterKey=s3domain,ParameterValue=$s3domain ParameterKey=ec2Subnet,ParameterValue=$subnet1 ParameterKey=ec2SecurityGroup,ParameterValue=$sgec2 ParameterKey=dbSecurityGroupId,ParameterValue=$sgdb ParameterKey=iaminstance,ParameterValue=$iaminstance)
-
 
 if [ $? -eq 0 ]; then
 	echo "Creating stack..."
 	aws cloudformation wait stack-create-complete --stack-name $stackname
 	echo "Stack created successfully. Stack Id below: "
-
 	echo $createOutput
 
 else
