@@ -2,35 +2,4 @@
 
 ssh -i ~/Downloads/csye6225keypair.pem centos@34.201.249.0
 
-
-hooks:
-  AfterInstall:
-   - location: ./beforeInstall.sh
-     timeout: 180
-     runas: centos
-  AfterInstall:
-   - location: ./afterInstall.sh
-     timeout: 180
-     runas: centos
-  ApplicationStart:
-   - location: ./applicationStart.sh
-     timeout: 180
-     runas: centos
-  ValidateService:
-   - location: ./validateService.sh
-     timeout: 180
-     runas: centos
-
-
-     sudo echo BUCKET=webapp.csye6225-fall2018-sharmaha.me>> /var/.env
-     sudo echo DB_HOST=",
-                                      {
-                                          "Fn::GetAtt": [
-                                              "RDSDB",
-                                              "Endpoint.Address"
-                                          ]
-                                      },
-                                      " >> /var/.env \n"
-
-
 ec2-54-166-255-22.compute-1.amazonaws.com:80/api/transaction                

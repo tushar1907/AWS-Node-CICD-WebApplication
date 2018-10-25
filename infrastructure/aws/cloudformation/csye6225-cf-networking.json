@@ -38,8 +38,6 @@
           "InternetGatewayId" : {"Ref" : "ig1"},
           "VpcId" : {"Ref" : "vpc1"}
           }
-
-
         },
 
         "routeTable1" : {
@@ -60,23 +58,59 @@
           }
         },
 
-       "mySubnet1" : {
+       "myPubSubnet1" : {
         "Type" : "AWS::EC2::Subnet",
         "Properties" : {
           "VpcId" : { "Ref" : "vpc1" },
-          "CidrBlock" : "10.0.0.0/24",
+          "CidrBlock" : "10.0.1.0/24",
           "AvailabilityZone" : "us-east-1a",
           "MapPublicIpOnLaunch" : true,
-          "Tags" : [{"Key" : "Name", "Value" : {"Fn::Join" : ["",[{"Ref" : "stackname"},"-csye6225-ec2-subnet"]] }}]
+          "Tags" : [{"Key" : "Name", "Value" : {"Fn::Join" : ["",[{"Ref" : "stackname"},"-csye6225-ec2-pub-subnet1"]] }}]
         }
        },
-      "mySubnetRouteTableAssociation1" : {
+      "myPubSubnetRouteTableAssociation1" : {
        "Type" : "AWS::EC2::SubnetRouteTableAssociation",
        "Properties" : {
-          "SubnetId" : { "Ref" : "mySubnet1" },
+          "SubnetId" : { "Ref" : "myPubSubnet1" },
           "RouteTableId" : { "Ref" : "routeTable1" }
        }
     },
+    "myPubSubnet2" : {
+      "Type" : "AWS::EC2::Subnet",
+      "Properties" : {
+        "VpcId" : { "Ref" : "vpc1" },
+        "CidrBlock" : "10.0.3.0/24",
+        "AvailabilityZone" : "us-east-1b",
+        "MapPublicIpOnLaunch" : true,
+        "Tags" : [{"Key" : "Name", "Value" : {"Fn::Join" : ["",[{"Ref" : "stackname"},"-csye6225-ec2-pub-subnet2"]] }}]
+      }
+     },
+    "myPubSubnetRouteTableAssociation2" : {
+     "Type" : "AWS::EC2::SubnetRouteTableAssociation",
+     "Properties" : {
+        "SubnetId" : { "Ref" : "myPubSubnet2" },
+        "RouteTableId" : { "Ref" : "routeTable1" }
+     }
+  },
+
+  "myPubSubnet3" : {
+    "Type" : "AWS::EC2::Subnet",
+    "Properties" : {
+      "VpcId" : { "Ref" : "vpc1" },
+      "CidrBlock" : "10.0.5.0/24",
+      "AvailabilityZone" : "us-east-1c",
+      "MapPublicIpOnLaunch" : true,
+      "Tags" : [{"Key" : "Name", "Value" : {"Fn::Join" : ["",[{"Ref" : "stackname"},"-csye6225-ec2-pub-subnet3"]] }}]
+    }
+   },
+  "myPubSubnetRouteTableAssociation3" : {
+   "Type" : "AWS::EC2::SubnetRouteTableAssociation",
+   "Properties" : {
+      "SubnetId" : { "Ref" : "myPubSubnet3" },
+      "RouteTableId" : { "Ref" : "routeTable1" }
+   }
+},
+
 
         "routeTable2" : {
           "Type" : "AWS::EC2::RouteTable",
@@ -87,45 +121,61 @@
         },
 
 
-        "mySubnet2" : {
-         "Type" : "AWS::EC2::Subnet",
-         "Properties" : {
-           "VpcId" : { "Ref" : "vpc1" },
-           "CidrBlock" : "10.0.1.0/24",
-           "AvailabilityZone" : "us-east-1a",
-           "Tags" : [{"Key" : "Name", "Value" : {"Fn::Join" : ["",[{"Ref" : "stackname"},"-csye6225-db-subnet1"]] }}]
-         }
-        },
-        "mySubnet3" : {
+        "myPriSubnet1" : {
          "Type" : "AWS::EC2::Subnet",
          "Properties" : {
            "VpcId" : { "Ref" : "vpc1" },
            "CidrBlock" : "10.0.2.0/24",
+           "AvailabilityZone" : "us-east-1a",
+           "Tags" : [{"Key" : "Name", "Value" : {"Fn::Join" : ["",[{"Ref" : "stackname"},"-csye6225-db-subnet1"]] }}]
+         }
+        },
+        "myPriSubnet2" : {
+         "Type" : "AWS::EC2::Subnet",
+         "Properties" : {
+           "VpcId" : { "Ref" : "vpc1" },
+           "CidrBlock" : "10.0.4.0/24",
            "AvailabilityZone" : "us-east-1b",
            "Tags" : [{"Key" : "Name", "Value" : {"Fn::Join" : ["",[{"Ref" : "stackname"},"-csye6225-db-subnet2"]] }}]
          }
         },
-        "mySubnetRouteTableAssociation2" : {
+        "myPriSubnet3" : {
+          "Type" : "AWS::EC2::Subnet",
+          "Properties" : {
+            "VpcId" : { "Ref" : "vpc1" },
+            "CidrBlock" : "10.0.6.0/24",
+            "AvailabilityZone" : "us-east-1c",
+            "Tags" : [{"Key" : "Name", "Value" : {"Fn::Join" : ["",[{"Ref" : "stackname"},"-csye6225-db-subnet3"]] }}]
+          }
+         },
+        "myPriSubnetRouteTableAssociation1" : {
          "Type" : "AWS::EC2::SubnetRouteTableAssociation",
          "Properties" : {
-            "SubnetId" : { "Ref" : "mySubnet2" },
+            "SubnetId" : { "Ref" : "myPriSubnet1" },
             "RouteTableId" : { "Ref" : "routeTable2" }
          }
       },
-      "mySubnetRouteTableAssociation3" : {
+      "myPrivSubnetRouteTableAssociation2" : {
        "Type" : "AWS::EC2::SubnetRouteTableAssociation",
        "Properties" : {
-          "SubnetId" : { "Ref" : "mySubnet3" },
+          "SubnetId" : { "Ref" : "myPriSubnet2" },
           "RouteTableId" : { "Ref" : "routeTable2" }
        }
     },
+    "myPrivSubnetRouteTableAssociation3" : {
+      "Type" : "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties" : {
+         "SubnetId" : { "Ref" : "myPriSubnet3" },
+         "RouteTableId" : { "Ref" : "routeTable2" }
+      }
+   },
 
     "DBSubnetGroup" : {
  "Type" : "AWS::RDS::DBSubnetGroup",
  "Properties" : {
     "DBSubnetGroupDescription" : "DB Subnet Group",
     "DBSubnetGroupName" : {"Fn::Join" : ["",[{"Ref" : "stackname"},"-csye6225-db-subnetgroup"]] },
-    "SubnetIds" : [ {"Ref" : "mySubnet2"},{"Ref" : "mySubnet3"}]
+    "SubnetIds" : [ {"Ref" : "myPriSubnet1"},{"Ref" : "myPriSubnet2"}]
 
  }
 },
@@ -211,7 +261,7 @@
 
           "Value" : {
 
-              "Ref" : "mySubnet1"
+              "Ref" : "myPubSubnet1"
 
           }
 
