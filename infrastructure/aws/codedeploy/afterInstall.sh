@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# update the permission and ownership of nodeapp in the var directory
+#unzipping the package and passing env file
 echo "#CSYE6225: doing after install"
 cd /var
 pwd
