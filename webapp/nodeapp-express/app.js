@@ -21,6 +21,11 @@ db.connect((err)=>{
   console.log("Mysql connected!...");
 });
 console.log("Enviornment : " + process.env.NODE_ENV)
+console.log("Enviornment : " + process.env.DB_PASS)
+console.log("Enviornment : " + process.env.DB_NAME)
+console.log("Enviornment : " + process.env.DB_HOST)
+console.log("Enviornment : " + process.env.DB_USER)
+
 
 const app=express();
 
