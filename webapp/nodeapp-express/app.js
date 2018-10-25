@@ -18,8 +18,30 @@ db.connect((err)=>{
   if(err){
     throw err;
   }
+  db.query('CREATE DATABASE IF NOT EXISTS '+process.env.DB_NAME, function (err) {// create db if not exist
+    if (err) throw err;
+    db.query('USE '+process.env.DB_NAME, function (err) {
+      if (err) throw err;
+      db.query('create table IF NOT EXISTS user('
+        + 'uuid VARBINARY(36) NOT NULL,'
+        + 'username VARCHAR(255) DEFAULT NULL,'
+        + 'password VARCHAR(255) DEFAULT NULL,'
+        + 'PRIMARY KEY ( uuid )'
+        +  ')', function (err) {
+            if (err) throw err;
+            console.log("New Table created");
+      });
+    });
+  });
+  logger.info("Mysql connected!...");
   console.log("Mysql connected!...");
 });
+
+
+
+
+
+
 console.log("Enviornment : " + process.env.NODE_ENV)
 console.log("Enviornment : " + process.env.DB_PASS)
 console.log("Enviornment : " + process.env.DB_NAME)
