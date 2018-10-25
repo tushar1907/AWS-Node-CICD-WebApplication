@@ -9,7 +9,7 @@ sid=$(aws cloudformation describe-stacks --stack-name $netstack --query Stacks[0
 echo "Stack Id: $sid"
 vpc=$(aws ec2 describe-vpcs --filter "Name=tag:aws:cloudformation:stack-id,Values=$sid" --query Vpcs[0].VpcId --output text)
 echo "VPC Id: $vpc"
-subnet1=$(aws ec2 describe-subnets --filter "Name=tag:Name,Values=$netstack-csye6225-ec2-subnet" --query Subnets[0].SubnetId --output text)
+subnet1=$(aws ec2 describe-subnets --filter "Name=tag:Name,Values=$netstack-csye6225-ec2-pub-subnet1" --query Subnets[0].SubnetId --output text)
 echo "Subnet-1: $subnet1"
 dbsubnet=$(aws rds describe-db-subnet-groups  --query "DBSubnetGroups[?VpcId=='$vpc'].DBSubnetGroupName"  --output text)
 echo "DB Subnet Group Name: $dbsubnet"
@@ -21,7 +21,7 @@ iaminstance="EC2ToS3BucketInstanceProfile"
 echo "Instance Profile Name: $iaminstance"
 domain=$(aws route53 list-hosted-zones --query HostedZones[0].Name --output text)
 trimdomain=${domain::-1}
-s3domain="web-app.$trimdomain"
+s3domain="$domain+csy6225.com"
 echo "S3 Domain: $s3domain"
 
 
