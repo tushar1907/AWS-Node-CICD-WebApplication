@@ -302,11 +302,6 @@ app.post('/transaction/:tid/attachments',(req,res)=>{
             console.log("In the production enviornment")
             console.log(process.emit.key)
             console.log(process.env.key)
-          //   let s3 = new AWS.S3({
-          //     accessKeyId: 'AKIAJJYTLMJRYPL2FK6A',
-          //     secretAccessKey: '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',
-          //     Bucket: 'csye6225-fall2018-sharmaha.me.csye6225.com',
-          // });
           let s3 = new AWS.S3(process.env.key);
             console.log(s3)
               
