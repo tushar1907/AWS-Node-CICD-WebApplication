@@ -9,6 +9,7 @@ const uuid=require('uuid');
 const fs = require('fs')
 const config = require('dotenv').config()
 const AWS = require('aws-sdk')
+AWS.config.update({region: 'us-east-1'});
 
 
 const conn=require('./dbconn.js');
@@ -576,6 +577,44 @@ app.use('/login',login);
 app.listen('3000',()=>{
   console.log('Server started on 3000')
 });
-  
+//SES implementation// Create sendEmail params 
+var emailParams = {
+  Destination: { /* required */
+    ToAddresses: [
+      'gupta.tus@husky.neu.edu',
+      /* more items */
+    ]
+  },
+  Message: { /* required */
+    Body: { /* required */
+      Html: {
+       Charset: "UTF-8",
+       Data: "HTML_FORMAT_BODY"
+      },
+      Text: {
+       Charset: "UTF-8",
+       Data: "TEXT_FORMAT_BODY"
+      }
+     },
+     Subject: {
+      Charset: 'UTF-8',
+      Data: 'Test email'
+     }
+    },
+  Source: 'sharma.ha@husky.neu.edu', /* required */
+  ReplyToAddresses: [
+      'EMAIL_ADDRESS',
+    /* more items */
+  ],
+}; 
+// Create the promise and SES service object
+var sendPromise = new AWS.SES({apiVersion: '2010-12-01'}).sendEmail(emailParams).promise();
 
+sendPromise.then(
+  function(data) {
+    console.log(data.MessageId);
+  }).catch(
+    function(err) {
+    console.error(err, err.stack);
+  });
 
