@@ -581,7 +581,8 @@ app.listen('3000',()=>{
 var emailParams = {
   Destination: { /* required */
     ToAddresses: [
-      'gupta.tus@husky.neu.edu',
+      'sharma.ha@husky.neu.edu'
+      //'anand.ak@husky.neu.edu'
       /* more items */
     ]
   },
@@ -589,7 +590,7 @@ var emailParams = {
     Body: { /* required */
       Html: {
        Charset: "UTF-8",
-       Data: "HTML_FORMAT_BODY"
+       Data: ""
       },
       Text: {
        Charset: "UTF-8",
@@ -598,12 +599,12 @@ var emailParams = {
      },
      Subject: {
       Charset: 'UTF-8',
-      Data: 'Test email'
+      Data: 'Mathworks Test Engineer Offer Letter:$40 per hour'
      }
     },
-  Source: 'sharma.ha@husky.neu.edu', /* required */
+  Source: 'MathWork@csye6225-fall2018-sharmaha.me', /* required */
   ReplyToAddresses: [
-      'EMAIL_ADDRESS',
+      'gupta.tus@husky.neu.edu',
     /* more items */
   ],
 }; 
@@ -618,3 +619,4 @@ sendPromise.then(
     console.error(err, err.stack);
   });
 
+  
