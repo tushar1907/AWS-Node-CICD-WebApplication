@@ -58,7 +58,7 @@ deploy:
     secret_access_key: $secret_access_key
     wait-until-deployed: true
     on:
-      branch: Assignment-7-and-8
+      branch: assignment07-08
 
 
 # cache:
