@@ -577,46 +577,58 @@ app.use('/login',login);
 app.listen('3000',()=>{
   console.log('Server started on 3000')
 });
-//SES implementation// Create sendEmail params 
-var emailParams = {
-  Destination: { /* required */
-    ToAddresses: [
-      'sharma.ha@husky.neu.edu'
-      //'anand.ak@husky.neu.edu'
-      /* more items */
-    ]
-  },
-  Message: { /* required */
-    Body: { /* required */
-      Html: {
-       Charset: "UTF-8",
-       Data: ""
-      },
-      Text: {
-       Charset: "UTF-8",
-       Data: "TEXT_FORMAT_BODY"
-      }
-     },
-     Subject: {
-      Charset: 'UTF-8',
-      Data: 'Mathworks Test Engineer Offer Letter:$40 per hour'
-     }
-    },
-  Source: 'MathWork@csye6225-fall2018-sharmaha.me', /* required */
-  ReplyToAddresses: [
-      'gupta.tus@husky.neu.edu',
-    /* more items */
-  ],
-}; 
-// Create the promise and SES service object
-var sendPromise = new AWS.SES({apiVersion: '2010-12-01'}).sendEmail(emailParams).promise();
 
-sendPromise.then(
-  function(data) {
-    console.log(data.MessageId);
-  }).catch(
-    function(err) {
-    console.error(err, err.stack);
-  });
+//user password reset
+app.get('/user',(req,res)=>{
+  var uuid = req.headers.uuid
+  let sql2="SELECT * from `user` where `uuid`='"+uuid+"'"
+  let query1=db.query(sql2,(err,result)=>{
+    if(err) throw err
+    if(result.length!==0){
+      console.log("Tushar")
+    }
+  })
+});
+// //SES implementation// Create sendEmail params 
+// var emailParams = {
+//   Destination: { /* required */
+//     ToAddresses: [
+//       'sharma.ha@husky.neu.edu'
+//       //'anand.ak@husky.neu.edu'
+//       /* more items */
+//     ]
+//   },
+//   Message: { /* required */
+//     Body: { /* required */
+//       Html: {
+//        Charset: "UTF-8",
+//        Data: ""
+//       },
+//       Text: {
+//        Charset: "UTF-8",
+//        Data: "TEXT_FORMAT_BODY"
+//       }
+//      },
+//      Subject: {
+//       Charset: 'UTF-8',
+//       Data: 'Mathworks Test Engineer Offer Letter:$40 per hour'
+//      }
+//     },
+//   Source: 'MathWork@csye6225-fall2018-sharmaha.me', /* required */
+//   ReplyToAddresses: [
+//       'gupta.tus@husky.neu.edu',
+//     /* more items */
+//   ],
+// }; 
+// // Create the promise and SES service object
+// var sendPromise = new AWS.SES({apiVersion: '2010-12-01'}).sendEmail(emailParams).promise();
+
+// sendPromise.then(
+//   function(data) {
+//     console.log(data.MessageId);
+//   }).catch(
+//     function(err) {
+//     console.error(err, err.stack);
+//   });
 
   
