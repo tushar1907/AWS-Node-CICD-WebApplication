@@ -12,7 +12,6 @@ script:
   - ls -lrt
   - pwd
   - cd ../..
-  - cd ..
   - ls -lrt
 
 after_success:
@@ -38,27 +37,27 @@ after_success:
 deploy:
   - provider: s3
     local_dir: codedeploy_artifact
-    bucket: $s3_bucket
+    bucket: ${vcap.services.s3-sample-service.credentials.userName:default-bucket}
     region: us-east-1
     skip_cleanup: true
-    access_key_id: $access_key_id
-    secret_access_key: $secret_access_key
+    access_key_id: AKIAJJYTLMJRYPL2FK6A
+    secret_access_key: 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
     wait-until-deployed: true
     on:
       branch: Assignment-5
 
-  - provider: codedeploy
-    access_key_id: $access_key_id
-    bucket: $s3_bucket
-    key: csye6225-fall2018-$TRAVIS_JOB_NUMBER.zip
-    bundle_type: zip
-    application: $application
-    deployment_group: $deployment_group
-    region: us-east-1
-    secret_access_key: $secret_access_key
-    wait-until-deployed: true
-    on:
-      branch: Assignment-5
+#   - provider: codedeploy
+#     access_key_id: $access_key_id
+#     bucket: $s3_bucket
+#     key: csye6225-fall2018-$TRAVIS_JOB_NUMBER.zip
+#     bundle_type: zip
+#     application: $application
+#     deployment_group: $deployment_group
+#     region: us-east-1
+#     secret_access_key: $secret_access_key
+#     wait-until-deployed: true
+#     on:
+#       branch: Assignment-5
 
 
 # cache:
