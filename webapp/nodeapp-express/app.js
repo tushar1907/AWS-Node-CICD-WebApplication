@@ -9,6 +9,7 @@ const uuid=require('uuid');
 const fs = require('fs')
 const config = require('dotenv').config()
 const AWS = require('aws-sdk')
+AWS.config.update({region: 'us-east-1'});
 
 
 const conn=require('./dbconn.js');
@@ -302,11 +303,6 @@ app.post('/transaction/:tid/attachments',(req,res)=>{
             console.log("In the production enviornment")
             console.log(process.emit.key)
             console.log(process.env.key)
-          //   let s3 = new AWS.S3({
-          //     accessKeyId: 'AKIAJJYTLMJRYPL2FK6A',
-          //     secretAccessKey: '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',
-          //     Bucket: 'csye6225-fall2018-sharmaha.me.csye6225.com',
-          // });
           let s3 = new AWS.S3(process.env.key);
             console.log(s3)
               
@@ -581,6 +577,46 @@ app.use('/login',login);
 app.listen('3000',()=>{
   console.log('Server started on 3000')
 });
+//SES implementation// Create sendEmail params 
+var emailParams = {
+  Destination: { /* required */
+    ToAddresses: [
+      'sharma.ha@husky.neu.edu'
+      //'anand.ak@husky.neu.edu'
+      /* more items */
+    ]
+  },
+  Message: { /* required */
+    Body: { /* required */
+      Html: {
+       Charset: "UTF-8",
+       Data: ""
+      },
+      Text: {
+       Charset: "UTF-8",
+       Data: "TEXT_FORMAT_BODY"
+      }
+     },
+     Subject: {
+      Charset: 'UTF-8',
+      Data: 'Mathworks Test Engineer Offer Letter:$40 per hour'
+     }
+    },
+  Source: 'MathWork@csye6225-fall2018-sharmaha.me', /* required */
+  ReplyToAddresses: [
+      'gupta.tus@husky.neu.edu',
+    /* more items */
+  ],
+}; 
+// Create the promise and SES service object
+var sendPromise = new AWS.SES({apiVersion: '2010-12-01'}).sendEmail(emailParams).promise();
+
+sendPromise.then(
+  function(data) {
+    console.log(data.MessageId);
+  }).catch(
+    function(err) {
+    console.error(err, err.stack);
+  });
+
   
-
-
