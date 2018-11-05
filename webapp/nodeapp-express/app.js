@@ -582,53 +582,75 @@ app.listen('3000',()=>{
 app.get('/user',(req,res)=>{
   var uuid = req.headers.uuid
   let sql2="SELECT * from `user` where `uuid`='"+uuid+"'"
-  let query1=db.query(sql2,(err,result)=>{
-    if(err) throw err
-    if(result.length!==0){
-      //SES implementation// Create sendEmail params 
-      var emailParams = {
-        Destination: { /* required */
-          ToAddresses: [
-            'sharma.ha@husky.neu.edu'
-            //'anand.ak@husky.neu.edu'
-            /* more items */
-          ]
-        },
-        Message: { /* required */
-          Body: { /* required */
-            Html: {
-            Charset: "UTF-8",
-            Data: ""
-            },
-            Text: {
-            Charset: "UTF-8",
-            Data: "TEXT_FORMAT_BODY"
-            }
-          },
-          Subject: {
-            Charset: 'UTF-8',
-            Data: 'Mathworks Test Engineer Offer Letter:$40 per hour'
-          }
-          },
-        Source: 'gupta.tus@husky.neu.edu', /* required */
-        ReplyToAddresses: [
-            'gupta.tus@husky.neu.edu',
-          /* more items */
-        ],
-      }; 
-      // Create the promise and SES service object
-      var sendPromise = new AWS.SES({apiVersion: '2010-12-01'}).sendEmail(emailParams).promise();
 
-      sendPromise.then(
-        function(data) {
-          console.log(data.MessageId);
-        }).catch(
-          function(err) {
-          console.error(err, err.stack);
-        });
-          }
-        })
-        res.send({'msg':'Email send successfully'})
+      var AWS = require('aws-sdk');
+    
+
+    // Create publish parameters
+    var params = {
+      Message: 'MESSAGE_TEXT', /* required */
+      TopicArn: 'arn:aws:sns:us-east-1:801880070264:password_reset'
+    };
+
+    // Create promise and SNS service object
+    var publishTextPromise = new AWS.SNS({apiVersion: '2010-03-31'}).publish(params).promise();
+
+    // Handle promise's fulfilled/rejected states
+    publishTextPromise.then(
+      function(data) {
+        console.log(`Message ${params.Message} send sent to the topic ${params.TopicArn}`);
+        console.log("MessageID is " + data.MessageId);
+      }).catch(
+        function(err) {
+        console.error(err, err.stack);
+      });
+  // let query1=db.query(sql2,(err,result)=>{
+  //   if(err) throw err
+  //   if(result.length!==0){
+  //     //SES implementation// Create sendEmail params 
+  //     var emailParams = {
+  //       Destination: { /* required */
+  //         ToAddresses: [
+  //           'sharma.ha@husky.neu.edu'
+  //           //'anand.ak@husky.neu.edu'
+  //           /* more items */
+  //         ]
+  //       },
+  //       Message: { /* required */
+  //         Body: { /* required */
+  //           Html: {
+  //           Charset: "UTF-8",
+  //           Data: ""
+  //           },
+  //           Text: {
+  //           Charset: "UTF-8",
+  //           Data: "TEXT_FORMAT_BODY"
+  //           }
+  //         },
+  //         Subject: {
+  //           Charset: 'UTF-8',
+  //           Data: 'Mathworks Test Engineer Offer Letter:$40 per hour'
+  //         }
+  //         },
+  //       Source: 'gupta.tus@husky.neu.edu', /* required */
+  //       ReplyToAddresses: [
+  //           'gupta.tus@husky.neu.edu',
+  //         /* more items */
+  //       ],
+  //     }; 
+  //     // Create the promise and SES service object
+  //     var sendPromise = new AWS.SES({apiVersion: '2010-12-01'}).sendEmail(emailParams).promise();
+
+  //     sendPromise.then(
+  //       function(data) {
+  //         console.log(data.MessageId);
+  //       }).catch(
+  //         function(err) {
+  //         console.error(err, err.stack);
+  //       });
+  //         }
+  //       })
+  //       res.send({'msg':'Email send successfully'})
 });
 
 
