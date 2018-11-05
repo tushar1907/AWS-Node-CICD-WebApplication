@@ -64,6 +64,7 @@
     "EC2ToS3BucketRole" : {
       "Type" : "AWS::IAM::Role",
       "Properties" : {
+        "ManagedPolicyArns": ["CloudWatchAgentServerPolicy"],
         "AssumeRolePolicyDocument": {
           "Version" : "2012-10-17",
           "Statement" : [
