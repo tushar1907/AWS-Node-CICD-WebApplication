@@ -86,6 +86,37 @@
                                 "Fn::Join": [
                                     "",
                                     [
+                                        "echo TOPIC_ARN=",
+                                        {"Ref": "MySNSTopic"},
+                                        " >> /var/.env \n"
+                                    ]
+                                ]
+                            },
+                            {
+                                "Fn::Join": [
+                                    "",
+                                    [
+                                        "echo EMAIL_SOURCE=noreply@",
+                                        {"Ref" : "domainname"},
+                                        " >> /var/.env \n"
+                                    ]
+                                ]
+                            },
+                            {
+                                "Fn::Join": [
+                                    "",
+                                    [
+                                        "echo DDB_TABLE=",
+                                        {"Ref" : "stackname"},
+                                        "-csye6225-dynamodb-table",
+                                        " >> /var/.env \n"
+                                    ]
+                                ]
+                            },
+                            {
+                                "Fn::Join": [
+                                    "",
+                                    [
                                         "echo BUCKET=",
                                         {"Ref" : "s3domain"},
                                         " >> /var/.env \n"
@@ -106,12 +137,39 @@
                                         " >> /var/.env \n"
                                     ]
                                 ]
-                            }                           
+                            },
+                            "echo [general] > /var/awslogs.conf \n",
+                            "echo state_file = /var/awslogs/state/agent-state >> /var/awslogs.conf \n",
+                            "echo [/var/log/messages] >> /var/awslogs.conf \n",
+                            "echo file = /var/log/customlog.log >> /var/awslogs.conf \n",
+                            "echo log_group_name = csye6225_fall2018  >> /var/awslogs.conf \n",
+                            "echo log_stream_name = webapp >> /var/awslogs.conf \n",
+                            "echo datetime_format = %b %d %H:%M:%S >> /var/awslogs.conf \n",
+                            "wget https://s3.amazonaws.com/aws-cloudwatch/downloads/latest/awslogs-agent-setup.py \n",
+                            "python awslogs-agent-setup.py -n -r us-east-1 -c /var/awslogs.conf\n",
+                            "echo [Unit] > /var/awslogs.service \n",
+                            "echo Description=CloudWatch Logs agent >> /var/awslogs.service \n",
+                            "echo After=rc-local.service >> /var/awslogs.service \n",
+                            "echo [Service] >> /var/awslogs.service \n",
+                            "echo Type=simple >> /var/awslogs.service \n",
+                            "echo Restart=always >> /var/awslogs.service \n",
+                            "echo KillMode=process >> /var/awslogs.service \n",
+                            "echo TimeoutSec=infinity >> /var/awslogs.service \n",
+                            "echo PIDFILE=/var/awslogs/state/awslogs.pid >> /var/awslogs.service \n",
+                            "echo ExecStart=/var/awslogs/bin/awslogs-agent-launcher.sh --start --background --pidfile '$PIDFILE' --user awslogs --chuid awslogs '&' >> /var/awslogs.service \n",
+                            "echo [Install] >> /var/awslogs.service \n",
+                            "echo WantedBy=multi-user.target >> /var/awslogs.service \n",
+                            "mv /var/awslogs.service /etc/systemd/system \n",
+                            "echo --Custom Log File-- > /var/log/customlog.log \n",
+                            "chmod 777 /var/log/customlog.log \n",
+                            "systemctl enable awslogs.service \n",
+                            "systemctl start awslogs.service \n"                           
                         ]
                     ]
                 }
             }
           },
+          
           "DependsOn" : "RDSDB"
       },
       "S3" : {
@@ -151,6 +209,17 @@
           }
       }
     },
+    "MySNSTopic":{
+        "Type":"AWS::SNS::Topic",
+        "Properties":{
+          "TopicName":"LambdaTopic",
+          "Subscription":[
+            {
+              "Endpoint":{"Ref": "lambdaArn"}, "Protocol":"lambda"
+            }
+          ]
+        }
+      },
     "Outputs": {
         "InstanceId": {
             "Description": "InstanceId of the newly created EC2 instance",
