@@ -477,7 +477,7 @@ app.put('/transaction/:tid/attachments/:aid',(req,res)=>{
                     let query1=db.query(sql1,(err,result1)=>{
                       
                       if(err) throw err
-                      var filename = 'save/' + result1[0].url.split("/").pop();
+                      var filename = result1[0].url.split("/").pop();
                       if(result1.length!=0){               
                       let s3 = new AWS.S3(process.env.key);
                         var params = {
