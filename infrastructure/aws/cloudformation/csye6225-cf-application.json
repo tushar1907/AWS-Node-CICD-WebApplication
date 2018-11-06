@@ -31,6 +31,10 @@
       "iaminstance" : {
         "Description" : "Instance Profile Name for CodeDeploy to S3",
         "Type" : "String"
+      },
+      "lambdaArn":{
+          "Description":"EndPoint For lambda Function",
+          "Type":"String"
       }
     },
     "Resources": {
@@ -114,24 +118,6 @@
           },
           "DependsOn" : "RDSDB"
       },
-      "S3" : {
-      "Type" : "AWS::S3::Bucket",
-      "Properties" : {
-        "BucketName" : {"Ref" : "s3domain"}
-      }
-      },
-      "DynamoDBTable": {
-      "Type" : "AWS::DynamoDB::Table",
-      "Properties" : {
-        "AttributeDefinitions" : [ {"AttributeName" : "id", "AttributeType" : "S"}],
-        "KeySchema" : [ {"AttributeName" : "id", "KeyType" : "HASH"} ],
-        "ProvisionedThroughput" : {
-          "ReadCapacityUnits" : 5,
-          "WriteCapacityUnits" : 5
-        },
-        "TableName": {"Fn::Join" : ["",[{"Ref" : "stackname"},"-csye6225-dynamodb-table"]] }
-      }
-      },
       "RDSDB" :   {
         "Type" : "AWS::RDS::DBInstance",
         "Properties" :
@@ -149,8 +135,36 @@
             "PubliclyAccessible" : "false",
             "VPCSecurityGroups": [{"Ref": "dbSecurityGroupId"}]
           }
+      },
+        "SNS":{
+        "Type" : "AWS::SNS::Topic",
+        "Properties" : {
+          "DisplayName" : "csye6225_SNS",
+          "Subscription" : [{ "Endpoint" : { "Ref" : "lambdaArn" }, "Protocol" : "lambda" }],
+          "TopicName" : "password_reset"
+        }
+    },
+        
+      "S3" : {
+      "Type" : "AWS::S3::Bucket",
+      "Properties" : {
+        "BucketName" : {"Ref" : "s3domain"}
+      }
+      },
+      "DynamoDBTable": {
+      "Type" : "AWS::DynamoDB::Table",
+      "Properties" : {
+        "AttributeDefinitions" : [ {"AttributeName" : "id", "AttributeType" : "S"}],
+        "KeySchema" : [ {"AttributeName" : "id", "KeyType" : "HASH"} ],
+        "ProvisionedThroughput" : {
+          "ReadCapacityUnits" : 5,
+          "WriteCapacityUnits" : 5
+            },
+        "TableName": {"Fn::Join" : ["",[{"Ref" : "stackname"},"-csye6225-dynamodb-table"]] }
+        }
       }
     },
+    
     "Outputs": {
         "InstanceId": {
             "Description": "InstanceId of the newly created EC2 instance",
@@ -168,4 +182,5 @@
             }
         }
       }
+      
     }
