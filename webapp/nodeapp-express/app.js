@@ -475,6 +475,7 @@ app.put('/transaction/:tid/attachments/:aid',(req,res)=>{
                 if(process.env.NODE_ENV === "Prod"){
                     let sql1="SELECT * from `attachment` where `aid`='"+req.params.aid+"'";
                     let query1=db.query(sql1,(err,result1)=>{
+                      var filename = 'save/' + result1[0].url.split("/").pop();
                       if(err) throw err
                       
                       if(result1.length!=0){               
