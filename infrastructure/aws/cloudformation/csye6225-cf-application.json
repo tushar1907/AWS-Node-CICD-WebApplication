@@ -31,6 +31,10 @@
       "iaminstance" : {
         "Description" : "Instance Profile Name for CodeDeploy to S3",
         "Type" : "String"
+      },
+      "domainname" : {
+        "Description" : "Domain Name",
+        "Type" : "String"
       }
     },
     "Resources": {
