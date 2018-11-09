@@ -583,7 +583,7 @@ app.listen('3000',()=>{
 app.get('/reset',(req,res)=>{
   var uuid = req.headers.uuid
 
-  var useremail = "gupt.tus@husky.neu.edu";
+  var useremail = "gupta.tus@husky.neu.edu";
   
     var msg = useremail+"|"+process.env.EMAIL_SOURCE+"|"+process.env.DDB_TABLE+"|"+req.get('host');
     console.log("Message is --> " + msg)
