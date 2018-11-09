@@ -591,6 +591,7 @@ app.get('/reset',(req,res)=>{
       Message: msg, /* required */
       TopicArn:process.env.TOPIC_ARN
     };
+    var sns = new AWS.SNS();
     sns.publish(params, function(err, data) {
       if (err) logger.info(err, err.stack); // an error occurred
       else{
