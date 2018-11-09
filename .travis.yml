@@ -44,20 +44,20 @@ deploy:
     secret_access_key: f3WsAtIY1icBQuKqbvIe/9HQOl7UGlQwzKBE//Zj
     wait-until-deployed: true
     on:
-      branch: Assignment-5
+      branch: Assignment-7-and-8
 
-#   - provider: codedeploy
-#     access_key_id: $access_key_id
-#     bucket: $s3_bucket
-#     key: csye6225-fall2018-$TRAVIS_JOB_NUMBER.zip
-#     bundle_type: zip
-#     application: $application
-#     deployment_group: $deployment_group
-#     region: us-east-1
-#     secret_access_key: $secret_access_key
-#     wait-until-deployed: true
-#     on:
-#       branch: Assignment-5
+  - provider: codedeploy
+    access_key_id: $access_key_id
+    bucket: $s3_bucket
+    key: csye6225-fall2018-$TRAVIS_JOB_NUMBER.zip
+    bundle_type: zip
+    application: $application
+    deployment_group: $deployment_group
+    region: us-east-1
+    secret_access_key: $secret_access_key
+    wait-until-deployed: true
+    on:
+      branch: assignment07-08
 
 
 # cache:
