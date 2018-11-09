@@ -595,9 +595,7 @@ app.get('/reset',(req,res)=>{
     sns.publish(params, function(err, data) {
       if (err) logger.info(err, err.stack); // an error occurred
       else{
-        logger.info(data);
-        req.flash('success','Reset link sent successfully!');
-        res.redirect('/forgot');
+        console.log(data);        
       }           // successful response
     });
   
