@@ -593,7 +593,7 @@ app.get('/reset',(req,res)=>{
     };
     var sns = new AWS.SNS();
     sns.publish(params, function(err, data) {
-      if (err) logger.info(err, err.stack); // an error occurred
+      if (err) console.log(err, err.stack); // an error occurred
       else{
         console.log(data);        
       }           // successful response
