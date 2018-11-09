@@ -9,6 +9,7 @@ const uuid=require('uuid');
 const fs = require('fs')
 const config = require('dotenv').config()
 const AWS = require('aws-sdk')
+AWS.config.update({region: 'us-east-1'});
 
 
 const conn=require('./dbconn.js');
@@ -302,11 +303,6 @@ app.post('/transaction/:tid/attachments',(req,res)=>{
             console.log("In the production enviornment")
             console.log(process.emit.key)
             console.log(process.env.key)
-          //   let s3 = new AWS.S3({
-          //     accessKeyId: 'AKIAJJYTLMJRYPL2FK6A',
-          //     secretAccessKey: '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',
-          //     Bucket: 'csye6225-fall2018-sharmaha.me.csye6225.com',
-          // });
           let s3 = new AWS.S3(process.env.key);
             console.log(s3)
               
@@ -479,8 +475,9 @@ app.put('/transaction/:tid/attachments/:aid',(req,res)=>{
                 if(process.env.NODE_ENV === "Prod"){
                     let sql1="SELECT * from `attachment` where `aid`='"+req.params.aid+"'";
                     let query1=db.query(sql1,(err,result1)=>{
-                      if(err) throw err
                       
+                      if(err) throw err
+                      var filename = result1[0].url.split("/").pop();
                       if(result1.length!=0){               
                       let s3 = new AWS.S3(process.env.key);
                         var params = {
@@ -581,6 +578,28 @@ app.use('/login',login);
 app.listen('3000',()=>{
   console.log('Server started on 3000')
 });
+
+//user password reset
+app.get('/reset',(req,res)=>{
+  var uuid = req.headers.uuid
+
+  var useremail = "gupt.tus@husky.neu.edu";
   
+    var msg = useremail+"|"+process.env.EMAIL_SOURCE+"|"+process.env.DDB_TABLE+"|"+req.get('host');
+    console.log("Message is --> " + msg)
+    var params = {
+      Message: msg, /* required */
+      TopicArn:process.env.TOPIC_ARN
+    };
+    var sns = new AWS.SNS();
+    sns.publish(params, function(err, data) {
+      if (err) logger.info(err, err.stack); // an error occurred
+      else{
+        console.log(data);        
+      }           // successful response
+    });
+  
+});
 
 
+  
