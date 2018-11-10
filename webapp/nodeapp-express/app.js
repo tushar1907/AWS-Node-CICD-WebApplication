@@ -475,9 +475,9 @@ app.put('/transaction/:tid/attachments/:aid',(req,res)=>{
                 if(process.env.NODE_ENV === "Prod"){
                     let sql1="SELECT * from `attachment` where `aid`='"+req.params.aid+"'";
                     let query1=db.query(sql1,(err,result1)=>{
-                      var filename = 'save/' + result1[0].url.split("/").pop();
+                      
                       if(err) throw err
-                      var filename = 'save/' + result1[0].url.split("/").pop();
+                      var filename = result1[0].url.split("/").pop();
                       if(result1.length!=0){               
                       let s3 = new AWS.S3(process.env.key);
                         var params = {
@@ -580,78 +580,25 @@ app.listen('3000',()=>{
 });
 
 //user password reset
-app.get('/user',(req,res)=>{
+app.get('/reset',(req,res)=>{
   var uuid = req.headers.uuid
-  let sql2="SELECT * from `user` where `uuid`='"+uuid+"'"
 
-      var AWS = require('aws-sdk');
-    
-
-    // Create publish parameters
+  var useremail = "gupt.tus@husky.neu.edu";
+  
+    var msg = useremail+"|"+process.env.EMAIL_SOURCE+"|"+process.env.DDB_TABLE+"|"+req.get('host');
+    console.log("Message is --> " + msg)
     var params = {
-      Message: 'MESSAGE_TEXT', /* required */
-      TopicArn: 'arn:aws:sns:us-east-1:801880070264:password_reset'
+      Message: msg, /* required */
+      TopicArn:process.env.TOPIC_ARN
     };
-
-    // Create promise and SNS service object
-    var publishTextPromise = new AWS.SNS({apiVersion: '2010-03-31'}).publish(params).promise();
-
-    // Handle promise's fulfilled/rejected states
-    publishTextPromise.then(
-      function(data) {
-        console.log(`Message ${params.Message} send sent to the topic ${params.TopicArn}`);
-        console.log("MessageID is " + data.MessageId);
-      }).catch(
-        function(err) {
-        console.error(err, err.stack);
-      });
-  // let query1=db.query(sql2,(err,result)=>{
-  //   if(err) throw err
-  //   if(result.length!==0){
-  //     //SES implementation// Create sendEmail params 
-  //     var emailParams = {
-  //       Destination: { /* required */
-  //         ToAddresses: [
-  //           'sharma.ha@husky.neu.edu'
-  //           //'anand.ak@husky.neu.edu'
-  //           /* more items */
-  //         ]
-  //       },
-  //       Message: { /* required */
-  //         Body: { /* required */
-  //           Html: {
-  //           Charset: "UTF-8",
-  //           Data: ""
-  //           },
-  //           Text: {
-  //           Charset: "UTF-8",
-  //           Data: "TEXT_FORMAT_BODY"
-  //           }
-  //         },
-  //         Subject: {
-  //           Charset: 'UTF-8',
-  //           Data: 'Mathworks Test Engineer Offer Letter:$40 per hour'
-  //         }
-  //         },
-  //       Source: 'gupta.tus@husky.neu.edu', /* required */
-  //       ReplyToAddresses: [
-  //           'gupta.tus@husky.neu.edu',
-  //         /* more items */
-  //       ],
-  //     }; 
-  //     // Create the promise and SES service object
-  //     var sendPromise = new AWS.SES({apiVersion: '2010-12-01'}).sendEmail(emailParams).promise();
-
-  //     sendPromise.then(
-  //       function(data) {
-  //         console.log(data.MessageId);
-  //       }).catch(
-  //         function(err) {
-  //         console.error(err, err.stack);
-  //       });
-  //         }
-  //       })
-  //       res.send({'msg':'Email send successfully'})
+    var sns = new AWS.SNS();
+    sns.publish(params, function(err, data) {
+      if (err) logger.info(err, err.stack); // an error occurred
+      else{
+        console.log(data);        
+      }           // successful response
+    });
+  
 });
 
 
