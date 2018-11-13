@@ -9,12 +9,22 @@ const uuid=require('uuid');
 const fs = require('fs')
 const config = require('dotenv').config()
 const AWS = require('aws-sdk')
+const winston = require('winston');
 AWS.config.update({region: 'us-east-1'});
+
+var logger = new winston.Logger({
+  level: 'info',
+  transports: [
+    new (winston.transports.Console)(),
+    new (winston.transports.File)({ filename: '/var/log/customlog.log' })
+  ]
+});
+logger.info("---Logs Initiated---");
 
 
 const conn=require('./dbconn.js');
 const db=new conn();
-console.log("...");
+logger.info("...");
 db.connect((err)=>{
   if(err){
     throw err;
@@ -30,7 +40,7 @@ db.connect((err)=>{
         + 'PRIMARY KEY ( uuid )'
         +  ')', function (err) {
             if (err) throw err;
-            console.log("New USER Table created");
+            logger.info("New USER Table created");
       });
       db.query('create table IF NOT EXISTS transaction('
         + 'tid varbinary(36) NOT NULL,'
@@ -43,7 +53,7 @@ db.connect((err)=>{
         + 'PRIMARY KEY (`tid`)'
         +  ')', function (err) {
             if (err) throw err;
-            console.log("New TRANSACTION Table created");
+            logger.info("New TRANSACTION Table created");
       });
       db.query('create table IF NOT EXISTS attachment('
         + 'aid varbinary(36) NOT NULL,'
@@ -54,11 +64,11 @@ db.connect((err)=>{
         + 'CONSTRAINT tid FOREIGN KEY (tid) REFERENCES transaction (tid)'
         +  ')', function (err) {
             if (err) throw err;
-            console.log("New ATTACHMENTS Table created");
+            logger.info("New ATTACHMENTS Table created");
       });      
     });
   });  
-  console.log("Mysql connected!...");
+  logger.info("Mysql connected!...");
 });
 
 console.log("Enviornment : " + process.env.NODE_ENV)
@@ -116,7 +126,7 @@ app.get('/',(req,res)=>{
 app.get('/logout',(req,res)=>{
   if(req.session.username){
   req.session.username=null;
-  console.log('Logged out');
+  logger.log('Logged out');
   req.flash('success','Logged Out!');
   }
   res.render('index');
@@ -158,11 +168,11 @@ app.post('/signup',(req,res)=>{
       let sql1="select username from `user` where `username`='"+req.body.username+"'";
       let query1=db.query(sql1,(err,result)=>{
         
-        console.log(result.length)
+        logger.info(result.length);
         if(result.length!=0)
         {
           flag=true;
-          console.log(flag+'--userexist'+err+'|'+result);
+          logger.log(flag+'--userexist'+err+'|'+result);
           req.flash('danger','User already exist!');
           res.redirect('/signup');
           return null;
@@ -170,7 +180,7 @@ app.post('/signup',(req,res)=>{
         else{
           if(flag===false)
           {
-            console.log(flag);
+            logger.info(flag);
           const sess=req.session;
           let user={
             username:req.body.username.trim(),
@@ -178,17 +188,17 @@ app.post('/signup',(req,res)=>{
           };
           var h=bcrypt.hashSync(req.body.pass,5);
           let saveuuid = uuid();
-          console.log("User ID------>" + saveuuid);
+          logger.log("User ID------>" + saveuuid);
           let sql2="insert into `user` (`uuid`,`username`,`password`)values('"+saveuuid+"','"+req.body.username+"','"+h+"')";
           let query2=db.query(sql2,(err,result)=>{                       
             if(result==='undefined')
             {
-              console.log('notdone'+err);
+              logger.info('notdone'+err);
               req.flash('danger','User not signed!');
               res.render('/signup');
             }
             else{
-              console.log('done2'+result);
+              logger.info('done2'+result);
               req.flash('success','User signed up! Log In now');
               res.redirect('/');
             }
@@ -217,11 +227,11 @@ app.post('/transaction',(req,res)=>{
   let category = req.body.category;
   let sql1="SELECT * from `user` where `uuid`='"+req.headers.uuid+"'";
   let query1=db.query(sql1,(err,result)=>{
-    console.log("------>"+result);
+    logger.info("------>"+result);
     if(result.length!=0){
       if(description && amount && merchant && date && category){
         let saveUuid = uuid()
-        console.log("Transaction ID------>" + saveUuid);
+        logger.log("Transaction ID------>" + saveUuid);
         let sql2="insert into `transaction` (`tid`,`description`,`amount`,`merchant`,`date`,`category`,`uuid`)values('"+saveUuid+"','"+description+"','"+amount+"','"+merchant+"','"+date+"','"+category+"','"+req.headers.uuid+"')";
         let query2=db.query(sql2,(err,result)=>{
         res.status(201).send({'error':err,'result':"Transaction successfully posted !"})
@@ -263,12 +273,12 @@ app.delete('/transaction/:id',(req,res)=>{
 
 app.put('/transaction/:id',(req,res)=>{  
   
-  console.log(req.params.id)
+  logger.info(req.params.id)
   if(req.params.id){
     let sql1="SELECT * from `transaction` where `tid`='"+req.params.id+"'";
     let query1=db.query(sql1,(err,result)=>{
-      console.log("------>"+ typeof result[0].uuid);
-      console.log("------>"+typeof req.headers.uuid);
+      logger.info("------>"+ typeof result[0].uuid);
+      logger.info("------>"+typeof req.headers.uuid);
       if(result.length!=0 && result[0].uuid == req.headers.uuid){
         let sql2='UPDATE `transaction` SET `description`=?,`amount`=?,`merchant`=?,`date`=?,`category`=? where `tid`=?';
         let query2=db.query(sql2,
@@ -300,15 +310,15 @@ app.post('/transaction/:tid/attachments',(req,res)=>{
           var nameString = url; 
           
           if(process.env.NODE_ENV === "Prod"){
-            console.log("In the production enviornment")
-            console.log(process.emit.key)
-            console.log(process.env.key)
+            logger.info("In the production enviornment")
+            logger.info(process.emit.key)
+            logger.info(process.env.key)
           let s3 = new AWS.S3(process.env.key);
-            console.log(s3)
+            logger.info(s3)
               
               var filename = nameString.split("/").pop();
               fs.readFile(url, (err, data) => {
-                console.log(data)
+                logger.info(data)
                 if (err) throw err;
                 const params = {
                     Bucket: process.env.BUCKET, // pass your bucket name
@@ -320,7 +330,7 @@ app.post('/transaction/:tid/attachments',(req,res)=>{
                 s3.upload(params, function(s3Err, data) {
                     if (s3Err) throw s3Err                    
                     let saveUuid = uuid()
-                    console.log("Attachment ID------>" + saveUuid);
+                    logger.info("Attachment ID------>" + saveUuid);
                     let sql2="insert into `attachment` (`aid`,`url`,`tid`)values('"+saveUuid+"','"+data.Location+"','"+req.params.tid+"')";
                     let query2=db.query(sql2,(err,result)=>{
                     res.status(201).send({'error':err,'result':"Attachment for the transaction saved successfully!"})
@@ -332,20 +342,20 @@ app.post('/transaction/:tid/attachments',(req,res)=>{
           }
           else if(process.env.NODE_ENV === "Dev"){
 
-            console.log("In the development enviornment")
+            logger.info("In the development enviornment")
             var filename = 'save/'+ nameString.split("/").pop();
             fs.copyFile(url, filename, (err) => {
               if (err) throw err;
-              console.log('source.txt was copied to destination');            
+              logger.info('source.txt was copied to destination');            
             });        
             let saveUuid = uuid()
-            console.log("Attachment ID------>" + saveUuid);
+            logger.info("Attachment ID------>" + saveUuid);
             let sql2="insert into `attachment` (`aid`,`url`,`tid`)values('"+saveUuid+"','"+filename+"','"+req.params.tid+"')";
             let query2=db.query(sql2,(err,result)=>{
             res.status(201).send({'error':err,'result':"Attachment for the transaction saved successfully!"})
             });
           }else{
-            console.log("not in any enviornment")
+            logger.info("not in any enviornment")
           }         
 
         }
@@ -390,9 +400,8 @@ app.delete('/transaction/:tid/attachments/:aid',(req,res)=>{
   let query1=db.query(sql2,(err,result)=>{
     if(result.length!=0){
 
-      if(result[0].uuid == req.headers.uuid){       
-        console.log("Tushar")     
-        console.log(process.env.NODE_ENV)
+      if(result[0].uuid == req.headers.uuid){            
+        logger.info(process.env.NODE_ENV)
         if(process.env.NODE_ENV === "Prod"){
 
             let sql1="SELECT * from `attachment` where `aid`='"+req.params.aid+"'";
@@ -426,7 +435,7 @@ app.delete('/transaction/:tid/attachments/:aid',(req,res)=>{
           }
 
             else if(process.env.NODE_ENV === "Dev"){
-                console.log("In the development enviornment")                 
+                logger.info("In the development enviornment")                 
                 let sql1="SELECT * from `attachment` where `aid`='"+req.params.aid+"'";
                 let query1=db.query(sql1,(err,result1)=>{ 
                     if(err) throw err
@@ -446,7 +455,7 @@ app.delete('/transaction/:tid/attachments/:aid',(req,res)=>{
                 }); 
                 
             }else{
-            console.log("not in any enviornment")
+            logger.info("not in any enviornment")
         }  
       
       }else res.status(401).send({'error':'User not authenticated to delete this transaction !'})   
@@ -492,7 +501,7 @@ app.put('/transaction/:tid/attachments/:aid',(req,res)=>{
                               if (err) throw err;
                               var filename = url.split("/").pop();
                               fs.readFile(url, (err, data) => {
-                                console.log(data)
+                                logger.info(data)
                                 if (err) throw err;
                                 const params = {
                                     Bucket: process.env.BUCKET, // pass your bucket name
@@ -503,7 +512,7 @@ app.put('/transaction/:tid/attachments/:aid',(req,res)=>{
                                 s3.upload(params, function(s3Err, data) {
                                     if (s3Err) throw s3Err                    
                                     let saveUuid = uuid()
-                                    console.log("Attachment ID------>" + saveUuid);
+                                    logger.info("Attachment ID------>" + saveUuid);
                                     let sql2="insert into `attachment` (`aid`,`url`,`tid`)values('"+saveUuid+"','"+data.Location+"','"+req.params.tid+"')";
                                     let query2=db.query(sql2,(err,result)=>{
                                     res.status(201).send({'error':err,'result':"New attachment for the transaction saved successfully!"})
@@ -522,7 +531,7 @@ app.put('/transaction/:tid/attachments/:aid',(req,res)=>{
                   }
 
                     else if(process.env.NODE_ENV === "Dev"){
-                        console.log("In the development enviornment")                 
+                        logger.log("In the development enviornment")                 
                         let sql1="SELECT * from `attachment` where `aid`='"+req.params.aid+"'";
                         let query1=db.query(sql1,(err,result1)=>{ 
                             if(err) throw err
@@ -537,10 +546,10 @@ app.put('/transaction/:tid/attachments/:aid',(req,res)=>{
                                     var filename = 'save/'+ url.split("/").pop();
                                     fs.copyFile(url, filename, (err) => {
                                       if (err) throw err;
-                                      console.log('source.txt was copied to destination');            
+                                      logger.info('source.txt was copied to destination');            
                                     });        
                                     let saveUuid = uuid()
-                                    console.log("Attachment ID------>" + saveUuid);
+                                    logger.info("Attachment ID------>" + saveUuid);
                                     let sql2="insert into `attachment` (`aid`,`url`,`tid`)values('"+saveUuid+"','"+filename+"','"+req.params.tid+"')";
                                     let query2=db.query(sql2,(err,result)=>{
                                     res.status(201).send({'error':err,'result':"New attachment for the transaction saved successfully!"})
@@ -552,7 +561,7 @@ app.put('/transaction/:tid/attachments/:aid',(req,res)=>{
                         }); 
                         
                     }else{
-                    console.log("not in any enviornment")
+                    logger.log("not in any enviornment")
                 }  
 
               }
@@ -586,7 +595,7 @@ app.get('/reset',(req,res)=>{
   var useremail = "gupt.tus@husky.neu.edu";
   
     var msg = useremail+"|"+process.env.EMAIL_SOURCE+"|"+process.env.DDB_TABLE+"|"+req.get('host');
-    console.log("Message is --> " + msg)
+    logger.info("Message is --> " + msg)
     var params = {
       Message: msg, /* required */
       TopicArn:process.env.TOPIC_ARN
@@ -595,7 +604,7 @@ app.get('/reset',(req,res)=>{
     sns.publish(params, function(err, data) {
       if (err) logger.info(err, err.stack); // an error occurred
       else{
-        console.log(data);        
+        logger.info(data);        
       }           // successful response
     });
   
