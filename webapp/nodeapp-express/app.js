@@ -168,7 +168,7 @@ app.post('/signup',(req,res)=>{
       let sql1="select username from `user` where `username`='"+req.body.username+"'";
       let query1=db.query(sql1,(err,result)=>{
         
-        logger.log(result.length)
+        logger.log(result.length);
         if(result.length!=0)
         {
           flag=true;
