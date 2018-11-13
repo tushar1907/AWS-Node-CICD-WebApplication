@@ -9,6 +9,7 @@ const uuid=require('uuid');
 const fs = require('fs')
 const config = require('dotenv').config()
 const AWS = require('aws-sdk')
+const winston = require('winston');
 AWS.config.update({region: 'us-east-1'});
 
 var logger = new winston.Logger({
