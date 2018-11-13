@@ -39,6 +39,10 @@
       "lambdaArn" : {
         "Description" : "Lamda Function ARN",
         "Type" : "String"
+      },
+      "snsTopicArn" : {
+        "Description" : "SNS Topic ARN",
+        "Type" : "String"
       }
     },
     "Resources": {
@@ -95,7 +99,7 @@
                                     "",
                                     [
                                         "echo TOPIC_ARN=",
-                                        {"Ref": "MySNSTopic"},
+                                        {"Ref": "snsTopicArn"},
                                         " >> /var/.env \n"
                                     ]
                                 ]
@@ -215,31 +219,9 @@
             "PubliclyAccessible" : "false",
             "VPCSecurityGroups": [{"Ref": "dbSecurityGroupId"}]
           }
-      },
-      "MySNSTopic":{
-        "Type":"AWS::SNS::Topic",
-        "Properties":{
-          
-          "Subscription":[
-            {
-              "Endpoint":{"Ref" :  "lambdaArn"}, "Protocol":"lambda"
-            }
-          ],
-          "TopicName":"LambdaTopic"
-        }
-      },
-      "LambdaInvokePermission": {
-      "Type": "AWS::Lambda::Permission",
-      "Properties": {
-        "Action": "lambda:InvokeFunction",
-        "Principal": "sns.amazonaws.com",
-        "SourceArn": {"Ref": "MySNSTopic"},
-        "FunctionName": {"Ref": "lambdaArn"}
       }
-    }
-},
-    
    
+},  
     "Outputs": {
         "InstanceId": {
             "Description": "InstanceId of the newly created EC2 instance",
