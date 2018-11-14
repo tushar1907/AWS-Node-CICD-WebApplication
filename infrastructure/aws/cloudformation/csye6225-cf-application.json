@@ -194,37 +194,6 @@
             "VPCSecurityGroups": [{"Ref": "dbSecurityGroupId"}]
           }
       },
-<<<<<<< HEAD
-        "SNS":{
-        "Type" : "AWS::SNS::Topic",
-        "Properties" : {
-          "DisplayName" : "csye6225_SNS",
-          "Subscription" : [{ "Endpoint" : { "Ref" : "lambdaArn" }, "Protocol" : "lambda" }],
-          "TopicName" : "password_reset"
-        }
-    },
-        
-      "S3" : {
-      "Type" : "AWS::S3::Bucket",
-      "Properties" : {
-        "BucketName" : {"Ref" : "s3domain"}
-      }
-      },
-      "DynamoDBTable": {
-      "Type" : "AWS::DynamoDB::Table",
-      "Properties" : {
-        "AttributeDefinitions" : [ {"AttributeName" : "id", "AttributeType" : "S"}],
-        "KeySchema" : [ {"AttributeName" : "id", "KeyType" : "HASH"} ],
-        "ProvisionedThroughput" : {
-          "ReadCapacityUnits" : 5,
-          "WriteCapacityUnits" : 5
-            },
-        "TableName": {"Fn::Join" : ["",[{"Ref" : "stackname"},"-csye6225-dynamodb-table"]] }
-        }
-      }
-    },
-    
-=======
       "MySNSTopic":{
         "Type":"AWS::SNS::Topic",
         "Properties":{
@@ -249,7 +218,6 @@
 },
     
    
->>>>>>> 0226dd6f97b707b1c90140ca6e0838c98c23a490
     "Outputs": {
         "InstanceId": {
             "Description": "InstanceId of the newly created EC2 instance",
