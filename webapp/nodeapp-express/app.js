@@ -37,7 +37,7 @@ db.connect((err)=>{
         + 'uuid VARBINARY(36) NOT NULL,'
         + 'username VARCHAR(255) NOT NULL,'
         + 'password VARCHAR(255) NOT NULL,'
-        + 'email VARCHAR(255) NOT NULL'
+        + 'email VARCHAR(255) NOT NULL,'
         + 'PRIMARY KEY ( uuid )'
         +  ')', function (err) {
             if (err) throw err;
