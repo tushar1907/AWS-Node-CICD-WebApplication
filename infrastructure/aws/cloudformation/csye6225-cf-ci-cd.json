@@ -119,10 +119,10 @@
     "EC2ToS3BucketRole" : {
       "Type" : "AWS::IAM::Role",
       "Properties" : {
-        "ManagedPolicyArns" : ["arn:aws:iam::aws:policy/CloudWatchAgentAdminPolicy"],
+        "ManagedPolicyArns" : ["arn:aws:iam::aws:policy/CloudWatchAgentAdminPolicy","arn:aws:iam::aws:policy/service-role/AmazonEC2RoleforSSM"],
         "AssumeRolePolicyDocument": {
           "Version" : "2012-10-17",
-          "Statement" : [
+          "Statement" : [ 
             {
               "Effect" : "Allow",
               "Principal" : {
@@ -314,7 +314,7 @@
         "DeploymentGroupName" : {"Ref" : "depname"}
       }
     },
-    
+
     "lambdaServiceRole": {
       "Type": "AWS::IAM::Role",
       "Properties": {
