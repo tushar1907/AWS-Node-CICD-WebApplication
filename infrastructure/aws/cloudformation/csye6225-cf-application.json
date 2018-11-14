@@ -36,10 +36,6 @@
         "Description" : "Domain Name",
         "Type" : "String"
       },
-      "lambdaArn" : {
-        "Description" : "Lamda Function ARN",
-        "Type" : "String"
-      },
       "snsTopicArn" : {
         "Description" : "SNS Topic ARN",
         "Type" : "String"
@@ -150,6 +146,15 @@
                                     ]
                                 ]
                             },
+                            "echo [general] > /var/awslogs.conf \n",
+                            "echo state_file = /var/awslogs/state/agent-state >> /var/awslogs.conf \n",
+                            "echo [/var/log/messages] >> /var/awslogs.conf \n",
+                            "echo file = /var/log/customlog.log >> /var/awslogs.conf \n",
+                            "echo log_group_name = csye6225_fall2018  >> /var/awslogs.conf \n",
+                            "echo log_stream_name = webapp >> /var/awslogs.conf \n",
+                            "echo datetime_format = %b %d %H:%M:%S >> /var/awslogs.conf \n",
+                            "wget https://s3.amazonaws.com/aws-cloudwatch/downloads/latest/awslogs-agent-setup.py \n",
+                            "python awslogs-agent-setup.py -n -r us-east-1 -c /var/awslogs.conf\n",
                             "echo [Unit] > /var/awslogs.service \n",
                             "echo Description=CloudWatch Logs agent >> /var/awslogs.service \n",
                             "echo After=rc-local.service >> /var/awslogs.service \n",

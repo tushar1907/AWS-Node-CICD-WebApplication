@@ -314,62 +314,9 @@
         "ServiceRoleArn" : {"Fn::GetAtt" : ["CodeDeployServiceRole", "Arn"]},
         "DeploymentGroupName" : {"Ref" : "depname"}
       }
-    },
+    }
 
-    "lambdaServiceRole": {
-      "Type": "AWS::IAM::Role",
-      "Properties": {
-          "RoleName": "lambda_Dynamodb_SES",
-          "AssumeRolePolicyDocument": {
-              "Version": "2012-10-17",
-              "Statement": [
-                  {
-                      "Effect": "Allow",
-                      "Principal": {
-                          "Service": "lambda.amazonaws.com"
-                      },
-                      "Action": [
-                          "sts:AssumeRole"
-                      ]
-                  }
-              ]
-          },
-          "ManagedPolicyArns": [
-              "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
-              "arn:aws:iam::aws:policy/AmazonSESFullAccess",
-              "arn:aws:iam::aws:policy/AWSLambdaFullAccess"
-          ],
-          "Path": "/",
-          "Policies": [
-              {
-                  "PolicyName": "lambda_DB",
-                  "PolicyDocument": {
-                      "Version": "2012-10-17",
-                      "Statement": [
-                          {
-                              "Effect": "Allow",
-                              "Action": [
-                                  "logs:CreateLogGroup",
-                                  "logs:CreateLogStream",
-                                  "logs:PutLogEvents"
-                              ],
-                              "Resource": "arn:aws:logs:::*"
-                          },
-                          {
-                              "Effect": "Allow",
-                              "Action": [
-                                  "dynamodb:*"
-                              ],
-                              "Resource": [
-                                  "arn:aws:dynamodb:us-east-1::table/"
-                              ]
-                          }
-                      ]
-                  }
-              }
-          ]
-      }
-  }
+ 
     
 },
     "Outputs" : {
