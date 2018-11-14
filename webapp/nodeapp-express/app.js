@@ -35,9 +35,9 @@ db.connect((err)=>{
       if (err) throw err;
       db.query('create table IF NOT EXISTS user('
         + 'uuid VARBINARY(36) NOT NULL,'
-        + 'username VARCHAR(255) DEFAULT NULL,'
-        + 'password VARCHAR(255) DEFAULT NULL,'
-        + 'email VARCHAR(255) DEFAULT NULL'
+        + 'username VARCHAR(255) NOT NULL,'
+        + 'password VARCHAR(255) NOT NULL,'
+        + 'email VARCHAR(255) NOT NULL'
         + 'PRIMARY KEY ( uuid )'
         +  ')', function (err) {
             if (err) throw err;
@@ -200,8 +200,21 @@ app.post('/signup',(req,res)=>{
             }
             else{
               logger.info('done2'+result);
-              req.flash('success','User signed up! Log In now');
+              req.flash('success','User signed up successfull, Click on the verification link you got on email and Log In now');
               res.redirect('/');
+              
+              var ses = new AWS.SES()
+              // Create promise and SES service object
+              var verifyEmailPromise = new AWS.SES({apiVersion: '2010-12-01'}).verifyEmailIdentity({EmailAddress: req.body.email}).promise();
+
+              // Handle promise's fulfilled/rejected states
+              verifyEmailPromise.then(
+                function(data) {
+                  console.log("Email verification initiated");
+                }).catch(
+                  function(err) {
+                  console.error(err, err.stack);
+              });
             }
           });
         }
@@ -217,7 +230,6 @@ app.get('/transaction',(req,res)=>{
   let query2=db.query(q,(err,result)=>{
     res.status(200).send({'error':err,'result':result})    
   });
-
 });
 
 app.post('/transaction',(req,res)=>{   
@@ -614,9 +626,7 @@ app.get('/reset',(req,res)=>{
             }           // successful response
           });
         }
-      });
-
-  
+      }); 
   
 });
 
