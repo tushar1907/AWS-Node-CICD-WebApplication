@@ -176,7 +176,6 @@
                             "wget https://s3.amazonaws.com/amazoncloudwatch-agent/centos/amd64/latest/amazon-cloudwatch-agent.rpm \n",
                             "sudo rpm -U ./amazon-cloudwatch-agent.rpm \n",
                             "sudo /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a fetch-config -m ec2 -c file:/opt/cloudwatch-config.json -s \n"
-
                         ]
                     ]
                 }

@@ -172,7 +172,7 @@ app.post('/signup',(req,res)=>{
         if(result.length!=0)
         {
           flag=true;
-          logger.log(flag+'--userexist'+err+'|'+result);
+          logger.info(flag+'--userexist'+err+'|'+result);
           req.flash('danger','User already exist!');
           res.redirect('/signup');
           return null;
@@ -188,7 +188,7 @@ app.post('/signup',(req,res)=>{
           };
           var h=bcrypt.hashSync(req.body.pass,5);
           let saveuuid = uuid();
-          logger.log("User ID------>" + saveuuid);
+          logger.info("User ID------>" + saveuuid);
           let sql2="insert into `user` (`uuid`,`username`,`password`)values('"+saveuuid+"','"+req.body.username+"','"+h+"')";
           let query2=db.query(sql2,(err,result)=>{                       
             if(result==='undefined')
