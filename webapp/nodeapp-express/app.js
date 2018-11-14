@@ -37,6 +37,7 @@ db.connect((err)=>{
         + 'uuid VARBINARY(36) NOT NULL,'
         + 'username VARCHAR(255) DEFAULT NULL,'
         + 'password VARCHAR(255) DEFAULT NULL,'
+        + 'email VARCHAR(255) DEFAULT NULL'
         + 'PRIMARY KEY ( uuid )'
         +  ')', function (err) {
             if (err) throw err;
@@ -189,7 +190,7 @@ app.post('/signup',(req,res)=>{
           var h=bcrypt.hashSync(req.body.pass,5);
           let saveuuid = uuid();
           logger.log("User ID------>" + saveuuid);
-          let sql2="insert into `user` (`uuid`,`username`,`password`)values('"+saveuuid+"','"+req.body.username+"','"+h+"')";
+          let sql2="insert into `user` (`uuid`,`username`,`password`,`email`)values('"+saveuuid+"','"+req.body.username+"','"+h+"','"+req.body.email+"'))";
           let query2=db.query(sql2,(err,result)=>{                       
             if(result==='undefined')
             {
@@ -592,21 +593,30 @@ app.listen('3000',()=>{
 app.get('/reset',(req,res)=>{
   var uuid = req.headers.uuid
 
-  var useremail = "gupta.tus@northeastern.edu";
+  let sql1="select uuid from `user` where `uuid`='"+req.body.username+"'";
+      let query1=db.query(sql1,(err,result)=>{
+        
+        logger.info(result.length);
+        if(result.length!=0)
+        {
+          var useremail = result[0].email;
+          var msg = useremail+"|"+process.env.EMAIL_SOURCE+"|"+process.env.DDB_TABLE+"|"+req.get('host');
+          logger.info("Message is --> " + msg)
+          var params = {
+            Message: msg, /* required */
+            TopicArn:process.env.TOPIC_ARN
+          };
+          var sns = new AWS.SNS();
+          sns.publish(params, function(err, data) {
+            if (err) console.log(err, err.stack); // an error occurred
+            else{
+              logger.info(data);        
+            }           // successful response
+          });
+        }
+      });
+
   
-    var msg = useremail+"|"+process.env.EMAIL_SOURCE+"|"+process.env.DDB_TABLE+"|"+req.get('host');
-    logger.info("Message is --> " + msg)
-    var params = {
-      Message: msg, /* required */
-      TopicArn:process.env.TOPIC_ARN
-    };
-    var sns = new AWS.SNS();
-    sns.publish(params, function(err, data) {
-      if (err) console.log(err, err.stack); // an error occurred
-      else{
-        logger.info(data);        
-      }           // successful response
-    });
   
 });
 

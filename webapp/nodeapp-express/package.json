@@ -23,7 +23,7 @@
     "nodejs": "0.0.0",
     "nodemon": "^1.18.5",
     "uuid": "^3.3.2",
-    "winston": "^2.4.1"
+    "winston": "^2.4.4"
   },
   "devDependencies": {
     "dotenv": "^6.0.0"
