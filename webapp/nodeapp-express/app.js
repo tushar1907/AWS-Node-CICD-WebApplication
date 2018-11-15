@@ -11,7 +11,7 @@ const config = require('dotenv').config()
 const AWS = require('aws-sdk')
 const winston = require('winston');
 var StatsD = require('node-statsd'),
-      client = new StatsD();
+     client = new StatsD();
 AWS.config.update({region: 'us-east-1'});
 
 var logger = new winston.Logger({
@@ -37,8 +37,9 @@ db.connect((err)=>{
       if (err) throw err;
       db.query('create table IF NOT EXISTS user('
         + 'uuid VARBINARY(36) NOT NULL,'
-        + 'username VARCHAR(255) DEFAULT NULL,'
-        + 'password VARCHAR(255) DEFAULT NULL,'
+        + 'username VARCHAR(255) NOT NULL,'
+        + 'password VARCHAR(255) NOT NULL,'
+        + 'email VARCHAR(255) NOT NULL,'
         + 'PRIMARY KEY ( uuid )'
         +  ')', function (err) {
             if (err) throw err;
@@ -57,6 +58,7 @@ db.connect((err)=>{
             if (err) throw err;
             logger.info("New TRANSACTION Table created");
       });
+
       db.query('create table IF NOT EXISTS attachment('
         + 'aid varbinary(36) NOT NULL,'
         + 'url varchar(255) DEFAULT NULL,'
@@ -149,7 +151,7 @@ app.get('/signup',(req,res)=>{
   else{
     res.render('signup');
   }
-  client.increment('my_signup_counter');
+  client.increment('my_get_signup_counter');
 });
 app.post('/signup',(req,res)=>{
   if(req.session.username)
@@ -192,7 +194,7 @@ app.post('/signup',(req,res)=>{
           var h=bcrypt.hashSync(req.body.pass,5);
           let saveuuid = uuid();
           logger.info("User ID------>" + saveuuid);
-          let sql2="insert into `user` (`uuid`,`username`,`password`)values('"+saveuuid+"','"+req.body.username+"','"+h+"')";
+          let sql2="insert into `user` (`uuid`,`username`,`password`,`email`)values('"+saveuuid+"','"+req.body.username+"','"+h+"','"+req.body.email+"')";
           let query2=db.query(sql2,(err,result)=>{                       
             if(result==='undefined')
             {
@@ -202,8 +204,23 @@ app.post('/signup',(req,res)=>{
             }
             else{
               logger.info('done2'+result);
-              req.flash('success','User signed up! Log In now');
+              req.flash('success','User signed up successfull, Click on the verification link you got on email and Log In now');
+              client_post_signup = new StatsD();
+              client_post_signup.increment('my_post_signup_counter');
               res.redirect('/');
+              
+              var ses = new AWS.SES()
+              // Create promise and SES service object
+              var verifyEmailPromise = new AWS.SES({apiVersion: '2010-12-01'}).verifyEmailIdentity({EmailAddress: req.body.email}).promise();
+
+              // Handle promise's fulfilled/rejected states
+              verifyEmailPromise.then(
+                function(data) {
+                  logger.info("Email verification initiated");
+                }).catch(
+                  function(err) {
+                  console.error(err, err.stack);
+              });
             }
           });
         }
@@ -219,7 +236,6 @@ app.get('/transaction',(req,res)=>{
   let query2=db.query(q,(err,result)=>{
     res.status(200).send({'error':err,'result':result})    
   });
-
 });
 
 app.post('/transaction',(req,res)=>{   
@@ -234,10 +250,13 @@ app.post('/transaction',(req,res)=>{
     if(result.length!=0){
       if(description && amount && merchant && date && category){
         let saveUuid = uuid()
-        logger.log("Transaction ID------>" + saveUuid);
+        logger.info("Transaction ID------>" + saveUuid);
+        client2 = new StatsD();
+        client2.increment('my_post_txn_counter');
         let sql2="insert into `transaction` (`tid`,`description`,`amount`,`merchant`,`date`,`category`,`uuid`)values('"+saveUuid+"','"+description+"','"+amount+"','"+merchant+"','"+date+"','"+category+"','"+req.headers.uuid+"')";
         let query2=db.query(sql2,(err,result)=>{
         res.status(201).send({'error':err,'result':"Transaction successfully posted !"})
+        
         });
       }
       else{
@@ -249,7 +268,6 @@ app.post('/transaction',(req,res)=>{
       res.status(401).send({'error':'User not authenticated to delete this transaction !'})
     }  
   });
-  
 });
 
 
@@ -261,6 +279,8 @@ app.delete('/transaction/:id',(req,res)=>{
       let sql2="DELETE FROM `transaction` WHERE `tid` = '"+req.params.id+"'";
       let query2=db.query(sql2,(err,result)=>{
       res.status(204).send({'error':err,'result':"Transaction successfully deleted !"})
+      client3 = new StatsD();
+        client3.increment('my_delete_txn_counter');
       });
     }  
     else{
@@ -288,6 +308,8 @@ app.put('/transaction/:id',(req,res)=>{
           [req.body.description,req.body.amount, req.body.merchant,req.body.date,req.body.category, req.params.id]
           ,(err,result)=>{
             res.status(201).send({'error':err,'result':"Transaction successfully updated !"})
+            client4 = new StatsD();
+            client4.increment('my_put_txn_counter');
         });
       }  
       else{
@@ -337,11 +359,12 @@ app.post('/transaction/:tid/attachments',(req,res)=>{
                     let sql2="insert into `attachment` (`aid`,`url`,`tid`)values('"+saveUuid+"','"+data.Location+"','"+req.params.tid+"')";
                     let query2=db.query(sql2,(err,result)=>{
                     res.status(201).send({'error':err,'result':"Attachment for the transaction saved successfully!"})
+                    client5 = new StatsD();
+                    client5.increment('my_post_attachment_counter');
                     });
 
                 });
              });            
-
           }
           else if(process.env.NODE_ENV === "Dev"){
 
@@ -385,6 +408,8 @@ app.get('/transaction/:tid/attachments',(req,res)=>{
       let query = db.query(sql1,(err,results)=>{
         if(results.length!=0){          
           res.status(200).send({'result': results})
+          client6 = new StatsD();
+          client6.increment('my_get_attachment_counter');
       
         }else res.status(401).send({'error':'No attachments for this transaction !'}) 
       })
@@ -393,7 +418,6 @@ app.get('/transaction/:tid/attachments',(req,res)=>{
     else res.status(401).send({'error':'User not authenticated to get the attachments !'})
       
   });
-  
 });
 
 //Delete sepecific Attachment related to this transaction
@@ -426,6 +450,9 @@ app.delete('/transaction/:tid/attachments/:aid',(req,res)=>{
                       if (err) throw err;
                       
                       res.status(204).send("Attachment successfully deleted");
+                      client7 = new StatsD();
+                      client7.increment('my_delete_attachment_counter');
+                      
                       
                       
                     });
@@ -434,7 +461,7 @@ app.delete('/transaction/:tid/attachments/:aid',(req,res)=>{
                   
                 });
               }else res.status(401).send({'error':err,'result':"This specific attachment does not exist"})             
-            });            
+            });          
           }
 
             else if(process.env.NODE_ENV === "Dev"){
@@ -519,7 +546,9 @@ app.put('/transaction/:tid/attachments/:aid',(req,res)=>{
                                     let sql2="insert into `attachment` (`aid`,`url`,`tid`)values('"+saveUuid+"','"+data.Location+"','"+req.params.tid+"')";
                                     let query2=db.query(sql2,(err,result)=>{
                                     res.status(201).send({'error':err,'result':"New attachment for the transaction saved successfully!"})
-                                    });
+                                    client_update_attachment = new StatsD();
+                                    client_update_attachment.increment('my_update_attachment_counter'); 
+                                  });
 
                                 });
                               }); 
@@ -530,7 +559,8 @@ app.put('/transaction/:tid/attachments/:aid',(req,res)=>{
                           
                         });
                       }else res.status(401).send({'error':err,'result':"This specific attachment does not exist"})             
-                    });            
+                    });  
+                             
                   }
 
                     else if(process.env.NODE_ENV === "Dev"){
@@ -595,21 +625,33 @@ app.listen('3000',()=>{
 app.get('/reset',(req,res)=>{
   var uuid = req.headers.uuid
 
-  var useremail = "gupt.tus@husky.neu.edu";
-  
-    var msg = useremail+"|"+process.env.EMAIL_SOURCE+"|"+process.env.DDB_TABLE+"|"+req.get('host');
-    logger.info("Message is --> " + msg)
-    var params = {
-      Message: msg, /* required */
-      TopicArn:process.env.TOPIC_ARN
-    };
-    var sns = new AWS.SNS();
-    sns.publish(params, function(err, data) {
-      if (err) logger.info(err, err.stack); // an error occurred
-      else{
-        logger.info(data);        
-      }           // successful response
-    });
+  let sql1="select * from `user` where `uuid`='"+uuid+"'";
+      let query1=db.query(sql1,(err,result)=>{
+        
+        logger.info(result.length);
+        if(result.length!=0)
+        {
+          console.log(result)
+          console.log(result.email)
+          console.log(result[0].email)
+          var useremail = result[0].email;
+          var msg = useremail+"|"+process.env.EMAIL_SOURCE+"|"+process.env.DDB_TABLE+"|"+req.get('host');
+          logger.info("Message is --> " + msg)
+          var params = {
+            Message: msg, /* required */
+            TopicArn:process.env.TOPIC_ARN
+          };
+          var sns = new AWS.SNS();
+          sns.publish(params, function(err, data) {
+            if (err) console.log(err, err.stack); // an error occurred
+            else{
+              logger.info(data);  
+              client_reset = new StatsD();
+              client_reset.increment('my_reset_counter');      
+            }           // successful response
+          });
+        }
+      }); 
   
 });
 
