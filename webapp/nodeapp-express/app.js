@@ -58,6 +58,7 @@ db.connect((err)=>{
             if (err) throw err;
             logger.info("New TRANSACTION Table created");
       });
+      
       db.query('create table IF NOT EXISTS attachment('
         + 'aid varbinary(36) NOT NULL,'
         + 'url varchar(255) DEFAULT NULL,'
