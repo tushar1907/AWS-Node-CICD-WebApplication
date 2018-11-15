@@ -265,6 +265,8 @@ app.delete('/transaction/:id',(req,res)=>{
       let sql2="DELETE FROM `transaction` WHERE `tid` = '"+req.params.id+"'";
       let query2=db.query(sql2,(err,result)=>{
       res.status(204).send({'error':err,'result':"Transaction successfully deleted !"})
+      client3 = new StatsD();
+        client3.increment('my_delete_txn_counter');
       });
     }  
     else{
@@ -275,7 +277,6 @@ app.delete('/transaction/:id',(req,res)=>{
     res.status(400).send({'error':err,'result':"ID if the transaction to delete is missing !"})
   }
   }); 
-  client.increment('my_delete_txn_counter');
 });
 
 
@@ -293,6 +294,8 @@ app.put('/transaction/:id',(req,res)=>{
           [req.body.description,req.body.amount, req.body.merchant,req.body.date,req.body.category, req.params.id]
           ,(err,result)=>{
             res.status(201).send({'error':err,'result':"Transaction successfully updated !"})
+            client4 = new StatsD();
+            client4.increment('my_put_txn_counter');
         });
       }  
       else{
@@ -303,7 +306,6 @@ app.put('/transaction/:id',(req,res)=>{
   else{
     res.status(400).send({'result':"Bad request !"})
   }
-  client.increment('my_update_txn_counter');
 });
 
 //Attachments
@@ -343,11 +345,12 @@ app.post('/transaction/:tid/attachments',(req,res)=>{
                     let sql2="insert into `attachment` (`aid`,`url`,`tid`)values('"+saveUuid+"','"+data.Location+"','"+req.params.tid+"')";
                     let query2=db.query(sql2,(err,result)=>{
                     res.status(201).send({'error':err,'result':"Attachment for the transaction saved successfully!"})
+                    client5 = new StatsD();
+                    client5.increment('my_post_attachment_counter');
                     });
 
                 });
              });            
-             client.increment('my_post_attachment_counter');
           }
           else if(process.env.NODE_ENV === "Dev"){
 
@@ -391,6 +394,8 @@ app.get('/transaction/:tid/attachments',(req,res)=>{
       let query = db.query(sql1,(err,results)=>{
         if(results.length!=0){          
           res.status(200).send({'result': results})
+          client6 = new StatsD();
+          client6.increment('my_get_attachment_counter');
       
         }else res.status(401).send({'error':'No attachments for this transaction !'}) 
       })
@@ -399,7 +404,6 @@ app.get('/transaction/:tid/attachments',(req,res)=>{
     else res.status(401).send({'error':'User not authenticated to get the attachments !'})
       
   });
-  client.increment('my_get_attachment_counter');
 });
 
 //Delete sepecific Attachment related to this transaction
@@ -432,6 +436,9 @@ app.delete('/transaction/:tid/attachments/:aid',(req,res)=>{
                       if (err) throw err;
                       
                       res.status(204).send("Attachment successfully deleted");
+                      client7 = new StatsD();
+                      client7.increment('my_delete_attachment_counter');
+                      
                       
                       
                     });
@@ -440,8 +447,7 @@ app.delete('/transaction/:tid/attachments/:aid',(req,res)=>{
                   
                 });
               }else res.status(401).send({'error':err,'result':"This specific attachment does not exist"})             
-            }); 
-            client.increment('my_delete_attachment_counter');           
+            });          
           }
 
             else if(process.env.NODE_ENV === "Dev"){
