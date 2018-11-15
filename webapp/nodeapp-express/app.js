@@ -236,7 +236,8 @@ app.post('/transaction',(req,res)=>{
       if(description && amount && merchant && date && category){
         let saveUuid = uuid()
         logger.info("Transaction ID------>" + saveUuid);
-        client.increment('my_post_txn_counter');
+        client2 = new StatsD();
+        client2.increment('my_post_txn_counter');
         let sql2="insert into `transaction` (`tid`,`description`,`amount`,`merchant`,`date`,`category`,`uuid`)values('"+saveUuid+"','"+description+"','"+amount+"','"+merchant+"','"+date+"','"+category+"','"+req.headers.uuid+"')";
         let query2=db.query(sql2,(err,result)=>{
         res.status(201).send({'error':err,'result':"Transaction successfully posted !"})
@@ -252,7 +253,7 @@ app.post('/transaction',(req,res)=>{
       res.status(401).send({'error':'User not authenticated to delete this transaction !'})
     }  
   });
-  client.increment('my_post_txn_counter');
+  //client.increment('my_post_txn_counter');
 });
 
 
