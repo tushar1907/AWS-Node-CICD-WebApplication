@@ -37,8 +37,9 @@ db.connect((err)=>{
       if (err) throw err;
       db.query('create table IF NOT EXISTS user('
         + 'uuid VARBINARY(36) NOT NULL,'
-        + 'username VARCHAR(255) DEFAULT NULL,'
-        + 'password VARCHAR(255) DEFAULT NULL,'
+        + 'username VARCHAR(255) NOT NULL,'
+        + 'password VARCHAR(255) NOT NULL,'
+        + 'email VARCHAR(255) NOT NULL,'
         + 'PRIMARY KEY ( uuid )'
         +  ')', function (err) {
             if (err) throw err;
@@ -57,6 +58,7 @@ db.connect((err)=>{
             if (err) throw err;
             logger.info("New TRANSACTION Table created");
       });
+
       db.query('create table IF NOT EXISTS attachment('
         + 'aid varbinary(36) NOT NULL,'
         + 'url varchar(255) DEFAULT NULL,'
@@ -192,7 +194,7 @@ app.post('/signup',(req,res)=>{
           var h=bcrypt.hashSync(req.body.pass,5);
           let saveuuid = uuid();
           logger.info("User ID------>" + saveuuid);
-          let sql2="insert into `user` (`uuid`,`username`,`password`)values('"+saveuuid+"','"+req.body.username+"','"+h+"')";
+          let sql2="insert into `user` (`uuid`,`username`,`password`,`email`)values('"+saveuuid+"','"+req.body.username+"','"+h+"','"+req.body.email+"')";
           let query2=db.query(sql2,(err,result)=>{                       
             if(result==='undefined')
             {
@@ -202,8 +204,21 @@ app.post('/signup',(req,res)=>{
             }
             else{
               logger.info('done2'+result);
-              req.flash('success','User signed up! Log In now');
+              req.flash('success','User signed up successfull, Click on the verification link you got on email and Log In now');
               res.redirect('/');
+              
+              var ses = new AWS.SES()
+              // Create promise and SES service object
+              var verifyEmailPromise = new AWS.SES({apiVersion: '2010-12-01'}).verifyEmailIdentity({EmailAddress: req.body.email}).promise();
+
+              // Handle promise's fulfilled/rejected states
+              verifyEmailPromise.then(
+                function(data) {
+                  console.log("Email verification initiated");
+                }).catch(
+                  function(err) {
+                  console.error(err, err.stack);
+              });
             }
           });
         }
@@ -220,7 +235,6 @@ app.get('/transaction',(req,res)=>{
   let query2=db.query(q,(err,result)=>{
     res.status(200).send({'error':err,'result':result})    
   });
-
 });
 
 app.post('/transaction',(req,res)=>{   
@@ -609,22 +623,31 @@ app.listen('3000',()=>{
 app.get('/reset',(req,res)=>{
   var uuid = req.headers.uuid
 
-  var useremail = "gupt.tus@husky.neu.edu";
-  
-    var msg = useremail+"|"+process.env.EMAIL_SOURCE+"|"+process.env.DDB_TABLE+"|"+req.get('host');
-    logger.info("Message is --> " + msg)
-    var params = {
-      Message: msg, /* required */
-      TopicArn:process.env.TOPIC_ARN
-    };
-    var sns = new AWS.SNS();
-    sns.publish(params, function(err, data) {
-      if (err) logger.info(err, err.stack); // an error occurred
-      else{
-        logger.info(data);        
-      }           // successful response
-    });
-    client.increment('my_reset_Password_counter');     
+  let sql1="select * from `user` where `uuid`='"+uuid+"'";
+      let query1=db.query(sql1,(err,result)=>{
+        
+        logger.info(result.length);
+        if(result.length!=0)
+        {
+          console.log(result)
+          console.log(result.email)
+          console.log(result[0].email)
+          var useremail = result[0].email;
+          var msg = useremail+"|"+process.env.EMAIL_SOURCE+"|"+process.env.DDB_TABLE+"|"+req.get('host');
+          logger.info("Message is --> " + msg)
+          var params = {
+            Message: msg, /* required */
+            TopicArn:process.env.TOPIC_ARN
+          };
+          var sns = new AWS.SNS();
+          sns.publish(params, function(err, data) {
+            if (err) console.log(err, err.stack); // an error occurred
+            else{
+              logger.info(data);        
+            }           // successful response
+          });
+        }
+      }); 
   
 });
 
