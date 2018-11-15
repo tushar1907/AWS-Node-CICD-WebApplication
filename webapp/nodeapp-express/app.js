@@ -58,7 +58,7 @@ db.connect((err)=>{
             if (err) throw err;
             logger.info("New TRANSACTION Table created");
       });
-      
+
       db.query('create table IF NOT EXISTS attachment('
         + 'aid varbinary(36) NOT NULL,'
         + 'url varchar(255) DEFAULT NULL,'
@@ -194,7 +194,7 @@ app.post('/signup',(req,res)=>{
           var h=bcrypt.hashSync(req.body.pass,5);
           let saveuuid = uuid();
           logger.info("User ID------>" + saveuuid);
-          let sql2="insert into `user` (`uuid`,`username`,`password`,`email`)values('"+saveuuid+"','"+req.body.username+"','"+h+"','"+req.body.email+"'))";
+          let sql2="insert into `user` (`uuid`,`username`,`password`,`email`)values('"+saveuuid+"','"+req.body.username+"','"+h+"','"+req.body.email+"')";
           let query2=db.query(sql2,(err,result)=>{                       
             if(result==='undefined')
             {
