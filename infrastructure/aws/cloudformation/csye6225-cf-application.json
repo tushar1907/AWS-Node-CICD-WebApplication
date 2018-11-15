@@ -36,10 +36,6 @@
         "Description" : "Domain Name",
         "Type" : "String"
       },
-      "lambdaArn" : {
-        "Description" : "Lamda Function ARN",
-        "Type" : "String"
-      },
       "snsTopicArn" : {
         "Description" : "SNS Topic ARN",
         "Type" : "String"
@@ -175,7 +171,16 @@
                             "echo --Custom Log File-- > /var/log/customlog.log \n",
                             "chmod 777 /var/log/customlog.log \n",
                             "systemctl enable awslogs.service \n",
-                            "systemctl start awslogs.service \n"                           
+                            "systemctl start awslogs.service \n",
+                            "echo {\"agent\": {\"metrics_collection_interval\": 10,\"logfile\": \"/var/logs/amazon-cloudwatch-agent.log\"}, > /opt/cloudwatch-config.json \n",
+                            "echo \"logs\": {\"logs_collected\": {\"files\": {\"collect_list\": [{\"file_path\": \"/var/log/customlog.log\",\"log_group_name\": \"csye6225_fall2018\",\"log_stream_name\": \"webapp\"}]}}, >> /opt/cloudwatch-config.json \n",
+                            "echo \"log_stream_name\": \"cloudwatch_log_stream\"}, >> /opt/cloudwatch-config.json \n",
+                            "echo \"metrics\":{\"metrics_collected\":{ >> /opt/cloudwatch-config.json \n",
+                            "echo \"statsd\":{ >> /opt/cloudwatch-config.json \n",    
+                            "echo \"service_address\":\":8125\",\"metrics_collection_interval\":10,\"metrics_aggregation_interval\":0}}}} >> /opt/cloudwatch-config.json \n",
+                            "wget https://s3.amazonaws.com/amazoncloudwatch-agent/centos/amd64/latest/amazon-cloudwatch-agent.rpm \n",
+                            "sudo rpm -U ./amazon-cloudwatch-agent.rpm \n",
+                            "sudo /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a fetch-config -m ec2 -c file:/opt/cloudwatch-config.json -s \n"
                         ]
                     ]
                 }

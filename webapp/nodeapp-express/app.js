@@ -10,6 +10,8 @@ const fs = require('fs')
 const config = require('dotenv').config()
 const AWS = require('aws-sdk')
 const winston = require('winston');
+var StatsD = require('node-statsd'),
+     client = new StatsD();
 AWS.config.update({region: 'us-east-1'});
 
 var logger = new winston.Logger({
@@ -148,6 +150,7 @@ app.get('/signup',(req,res)=>{
   else{
     res.render('signup');
   }
+  client.increment('my_signup_counter');
 });
 app.post('/signup',(req,res)=>{
   if(req.session.username)
@@ -173,7 +176,7 @@ app.post('/signup',(req,res)=>{
         if(result.length!=0)
         {
           flag=true;
-          logger.log(flag+'--userexist'+err+'|'+result);
+          logger.info(flag+'--userexist'+err+'|'+result);
           req.flash('danger','User already exist!');
           res.redirect('/signup');
           return null;
@@ -189,7 +192,7 @@ app.post('/signup',(req,res)=>{
           };
           var h=bcrypt.hashSync(req.body.pass,5);
           let saveuuid = uuid();
-          logger.log("User ID------>" + saveuuid);
+          logger.info("User ID------>" + saveuuid);
           let sql2="insert into `user` (`uuid`,`username`,`password`,`email`)values('"+saveuuid+"','"+req.body.username+"','"+h+"','"+req.body.email+"'))";
           let query2=db.query(sql2,(err,result)=>{                       
             if(result==='undefined')
@@ -222,6 +225,7 @@ app.post('/signup',(req,res)=>{
       });
 
     }
+    client.increment('my_signup_counter');
   }
 });
 
@@ -244,10 +248,12 @@ app.post('/transaction',(req,res)=>{
     if(result.length!=0){
       if(description && amount && merchant && date && category){
         let saveUuid = uuid()
-        logger.log("Transaction ID------>" + saveUuid);
+        logger.info("Transaction ID------>" + saveUuid);
+        client.increment('my_post_txn_counter');
         let sql2="insert into `transaction` (`tid`,`description`,`amount`,`merchant`,`date`,`category`,`uuid`)values('"+saveUuid+"','"+description+"','"+amount+"','"+merchant+"','"+date+"','"+category+"','"+req.headers.uuid+"')";
         let query2=db.query(sql2,(err,result)=>{
         res.status(201).send({'error':err,'result':"Transaction successfully posted !"})
+        
         });
       }
       else{
@@ -259,7 +265,7 @@ app.post('/transaction',(req,res)=>{
       res.status(401).send({'error':'User not authenticated to delete this transaction !'})
     }  
   });
-  
+  client.increment('my_post_txn_counter');
 });
 
 
@@ -281,6 +287,7 @@ app.delete('/transaction/:id',(req,res)=>{
     res.status(400).send({'error':err,'result':"ID if the transaction to delete is missing !"})
   }
   }); 
+  client.increment('my_delete_txn_counter');
 });
 
 
@@ -308,6 +315,7 @@ app.put('/transaction/:id',(req,res)=>{
   else{
     res.status(400).send({'result':"Bad request !"})
   }
+  client.increment('my_update_txn_counter');
 });
 
 //Attachments
@@ -351,7 +359,7 @@ app.post('/transaction/:tid/attachments',(req,res)=>{
 
                 });
              });            
-
+             client.increment('my_post_attachment_counter');
           }
           else if(process.env.NODE_ENV === "Dev"){
 
@@ -403,7 +411,7 @@ app.get('/transaction/:tid/attachments',(req,res)=>{
     else res.status(401).send({'error':'User not authenticated to get the attachments !'})
       
   });
-  
+  client.increment('my_get_attachment_counter');
 });
 
 //Delete sepecific Attachment related to this transaction
@@ -444,7 +452,8 @@ app.delete('/transaction/:tid/attachments/:aid',(req,res)=>{
                   
                 });
               }else res.status(401).send({'error':err,'result':"This specific attachment does not exist"})             
-            });            
+            }); 
+            client.increment('my_delete_attachment_counter');           
           }
 
             else if(process.env.NODE_ENV === "Dev"){
@@ -540,7 +549,8 @@ app.put('/transaction/:tid/attachments/:aid',(req,res)=>{
                           
                         });
                       }else res.status(401).send({'error':err,'result':"This specific attachment does not exist"})             
-                    });            
+                    });  
+                    client.increment('my_update_attachment_counter');          
                   }
 
                     else if(process.env.NODE_ENV === "Dev"){
