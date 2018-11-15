@@ -622,6 +622,9 @@ app.get('/reset',(req,res)=>{
         logger.info(result.length);
         if(result.length!=0)
         {
+          console.log(result)
+          console.log(result.email)
+          console.log(result[0].email)
           var useremail = result[0].email;
           var msg = useremail+"|"+process.env.EMAIL_SOURCE+"|"+process.env.DDB_TABLE+"|"+req.get('host');
           logger.info("Message is --> " + msg)
