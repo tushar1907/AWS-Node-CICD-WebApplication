@@ -151,7 +151,7 @@ app.get('/signup',(req,res)=>{
   else{
     res.render('signup');
   }
-  client.increment('my_signup_counter');
+  client.increment('my_get_signup_counter');
 });
 app.post('/signup',(req,res)=>{
   if(req.session.username)
@@ -205,6 +205,8 @@ app.post('/signup',(req,res)=>{
             else{
               logger.info('done2'+result);
               req.flash('success','User signed up successfull, Click on the verification link you got on email and Log In now');
+              client_post_signup = new StatsD();
+              client_post_signup.increment('my_post_signup_counter');
               res.redirect('/');
               
               var ses = new AWS.SES()
@@ -214,7 +216,7 @@ app.post('/signup',(req,res)=>{
               // Handle promise's fulfilled/rejected states
               verifyEmailPromise.then(
                 function(data) {
-                  console.log("Email verification initiated");
+                  logger.info("Email verification initiated");
                 }).catch(
                   function(err) {
                   console.error(err, err.stack);
@@ -226,7 +228,6 @@ app.post('/signup',(req,res)=>{
       });
 
     }
-    client.increment('my_signup_counter');
   }
 });
 
@@ -267,7 +268,6 @@ app.post('/transaction',(req,res)=>{
       res.status(401).send({'error':'User not authenticated to delete this transaction !'})
     }  
   });
-  //client.increment('my_post_txn_counter');
 });
 
 
@@ -546,7 +546,9 @@ app.put('/transaction/:tid/attachments/:aid',(req,res)=>{
                                     let sql2="insert into `attachment` (`aid`,`url`,`tid`)values('"+saveUuid+"','"+data.Location+"','"+req.params.tid+"')";
                                     let query2=db.query(sql2,(err,result)=>{
                                     res.status(201).send({'error':err,'result':"New attachment for the transaction saved successfully!"})
-                                    });
+                                    client_update_attachment = new StatsD();
+                                    client_update_attachment.increment('my_update_attachment_counter'); 
+                                  });
 
                                 });
                               }); 
@@ -558,7 +560,7 @@ app.put('/transaction/:tid/attachments/:aid',(req,res)=>{
                         });
                       }else res.status(401).send({'error':err,'result':"This specific attachment does not exist"})             
                     });  
-                    client.increment('my_update_attachment_counter');          
+                             
                   }
 
                     else if(process.env.NODE_ENV === "Dev"){
@@ -643,7 +645,9 @@ app.get('/reset',(req,res)=>{
           sns.publish(params, function(err, data) {
             if (err) console.log(err, err.stack); // an error occurred
             else{
-              logger.info(data);        
+              logger.info(data);  
+              client_reset = new StatsD();
+              client_reset.increment('my_reset_counter');      
             }           // successful response
           });
         }
