@@ -235,10 +235,12 @@ app.post('/transaction',(req,res)=>{
     if(result.length!=0){
       if(description && amount && merchant && date && category){
         let saveUuid = uuid()
-        logger.log("Transaction ID------>" + saveUuid);
+        logger.info("Transaction ID------>" + saveUuid);
+        client.increment('my_post_txn_counter');
         let sql2="insert into `transaction` (`tid`,`description`,`amount`,`merchant`,`date`,`category`,`uuid`)values('"+saveUuid+"','"+description+"','"+amount+"','"+merchant+"','"+date+"','"+category+"','"+req.headers.uuid+"')";
         let query2=db.query(sql2,(err,result)=>{
         res.status(201).send({'error':err,'result':"Transaction successfully posted !"})
+        
         });
       }
       else{
