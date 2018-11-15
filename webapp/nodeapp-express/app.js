@@ -9,11 +9,24 @@ const uuid=require('uuid');
 const fs = require('fs')
 const config = require('dotenv').config()
 const AWS = require('aws-sdk')
+const winston = require('winston');
+var StatsD = require('node-statsd'),
+     client = new StatsD();
+AWS.config.update({region: 'us-east-1'});
+
+var logger = new winston.Logger({
+  level: 'info',
+  transports: [
+    new (winston.transports.Console)(),
+    new (winston.transports.File)({ filename: '/var/log/customlog.log' })
+  ]
+});
+logger.info("---Logs Initiated---");
 
 
 const conn=require('./dbconn.js');
 const db=new conn();
-console.log("...");
+logger.info("...");
 db.connect((err)=>{
   if(err){
     throw err;
@@ -24,12 +37,13 @@ db.connect((err)=>{
       if (err) throw err;
       db.query('create table IF NOT EXISTS user('
         + 'uuid VARBINARY(36) NOT NULL,'
-        + 'username VARCHAR(255) DEFAULT NULL,'
-        + 'password VARCHAR(255) DEFAULT NULL,'
+        + 'username VARCHAR(255) NOT NULL,'
+        + 'password VARCHAR(255) NOT NULL,'
+        + 'email VARCHAR(255) NOT NULL,'
         + 'PRIMARY KEY ( uuid )'
         +  ')', function (err) {
             if (err) throw err;
-            console.log("New USER Table created");
+            logger.info("New USER Table created");
       });
       db.query('create table IF NOT EXISTS transaction('
         + 'tid varbinary(36) NOT NULL,'
@@ -42,8 +56,9 @@ db.connect((err)=>{
         + 'PRIMARY KEY (`tid`)'
         +  ')', function (err) {
             if (err) throw err;
-            console.log("New TRANSACTION Table created");
+            logger.info("New TRANSACTION Table created");
       });
+
       db.query('create table IF NOT EXISTS attachment('
         + 'aid varbinary(36) NOT NULL,'
         + 'url varchar(255) DEFAULT NULL,'
@@ -53,11 +68,11 @@ db.connect((err)=>{
         + 'CONSTRAINT tid FOREIGN KEY (tid) REFERENCES transaction (tid)'
         +  ')', function (err) {
             if (err) throw err;
-            console.log("New ATTACHMENTS Table created");
+            logger.info("New ATTACHMENTS Table created");
       });      
     });
   });  
-  console.log("Mysql connected!...");
+  logger.info("Mysql connected!...");
 });
 
 console.log("Enviornment : " + process.env.NODE_ENV)
@@ -115,7 +130,7 @@ app.get('/',(req,res)=>{
 app.get('/logout',(req,res)=>{
   if(req.session.username){
   req.session.username=null;
-  console.log('Logged out');
+  logger.log('Logged out');
   req.flash('success','Logged Out!');
   }
   res.render('index');
@@ -136,6 +151,7 @@ app.get('/signup',(req,res)=>{
   else{
     res.render('signup');
   }
+  client.increment('my_get_signup_counter');
 });
 app.post('/signup',(req,res)=>{
   if(req.session.username)
@@ -157,11 +173,11 @@ app.post('/signup',(req,res)=>{
       let sql1="select username from `user` where `username`='"+req.body.username+"'";
       let query1=db.query(sql1,(err,result)=>{
         
-        console.log(result.length)
+        logger.info(result.length);
         if(result.length!=0)
         {
           flag=true;
-          console.log(flag+'--userexist'+err+'|'+result);
+          logger.info(flag+'--userexist'+err+'|'+result);
           req.flash('danger','User already exist!');
           res.redirect('/signup');
           return null;
@@ -169,7 +185,7 @@ app.post('/signup',(req,res)=>{
         else{
           if(flag===false)
           {
-            console.log(flag);
+            logger.info(flag);
           const sess=req.session;
           let user={
             username:req.body.username.trim(),
@@ -177,19 +193,34 @@ app.post('/signup',(req,res)=>{
           };
           var h=bcrypt.hashSync(req.body.pass,5);
           let saveuuid = uuid();
-          console.log("User ID------>" + saveuuid);
-          let sql2="insert into `user` (`uuid`,`username`,`password`)values('"+saveuuid+"','"+req.body.username+"','"+h+"')";
+          logger.info("User ID------>" + saveuuid);
+          let sql2="insert into `user` (`uuid`,`username`,`password`,`email`)values('"+saveuuid+"','"+req.body.username+"','"+h+"','"+req.body.email+"')";
           let query2=db.query(sql2,(err,result)=>{                       
             if(result==='undefined')
             {
-              console.log('notdone'+err);
+              logger.info('notdone'+err);
               req.flash('danger','User not signed!');
               res.render('/signup');
             }
             else{
-              console.log('done2'+result);
-              req.flash('success','User signed up! Log In now');
+              logger.info('done2'+result);
+              req.flash('success','User signed up successfull, Click on the verification link you got on email and Log In now');
+              client_post_signup = new StatsD();
+              client_post_signup.increment('my_post_signup_counter');
               res.redirect('/');
+              
+              var ses = new AWS.SES()
+              // Create promise and SES service object
+              var verifyEmailPromise = new AWS.SES({apiVersion: '2010-12-01'}).verifyEmailIdentity({EmailAddress: req.body.email}).promise();
+
+              // Handle promise's fulfilled/rejected states
+              verifyEmailPromise.then(
+                function(data) {
+                  logger.info("Email verification initiated");
+                }).catch(
+                  function(err) {
+                  console.error(err, err.stack);
+              });
             }
           });
         }
@@ -205,7 +236,6 @@ app.get('/transaction',(req,res)=>{
   let query2=db.query(q,(err,result)=>{
     res.status(200).send({'error':err,'result':result})    
   });
-
 });
 
 app.post('/transaction',(req,res)=>{   
@@ -216,14 +246,17 @@ app.post('/transaction',(req,res)=>{
   let category = req.body.category;
   let sql1="SELECT * from `user` where `uuid`='"+req.headers.uuid+"'";
   let query1=db.query(sql1,(err,result)=>{
-    console.log("------>"+result);
+    logger.info("------>"+result);
     if(result.length!=0){
       if(description && amount && merchant && date && category){
         let saveUuid = uuid()
-        console.log("Transaction ID------>" + saveUuid);
+        logger.info("Transaction ID------>" + saveUuid);
+        client2 = new StatsD();
+        client2.increment('my_post_txn_counter');
         let sql2="insert into `transaction` (`tid`,`description`,`amount`,`merchant`,`date`,`category`,`uuid`)values('"+saveUuid+"','"+description+"','"+amount+"','"+merchant+"','"+date+"','"+category+"','"+req.headers.uuid+"')";
         let query2=db.query(sql2,(err,result)=>{
         res.status(201).send({'error':err,'result':"Transaction successfully posted !"})
+        
         });
       }
       else{
@@ -235,7 +268,6 @@ app.post('/transaction',(req,res)=>{
       res.status(401).send({'error':'User not authenticated to delete this transaction !'})
     }  
   });
-  
 });
 
 
@@ -247,6 +279,8 @@ app.delete('/transaction/:id',(req,res)=>{
       let sql2="DELETE FROM `transaction` WHERE `tid` = '"+req.params.id+"'";
       let query2=db.query(sql2,(err,result)=>{
       res.status(204).send({'error':err,'result':"Transaction successfully deleted !"})
+      client3 = new StatsD();
+        client3.increment('my_delete_txn_counter');
       });
     }  
     else{
@@ -262,18 +296,20 @@ app.delete('/transaction/:id',(req,res)=>{
 
 app.put('/transaction/:id',(req,res)=>{  
   
-  console.log(req.params.id)
+  logger.info(req.params.id)
   if(req.params.id){
     let sql1="SELECT * from `transaction` where `tid`='"+req.params.id+"'";
     let query1=db.query(sql1,(err,result)=>{
-      console.log("------>"+ typeof result[0].uuid);
-      console.log("------>"+typeof req.headers.uuid);
+      logger.info("------>"+ typeof result[0].uuid);
+      logger.info("------>"+typeof req.headers.uuid);
       if(result.length!=0 && result[0].uuid == req.headers.uuid){
         let sql2='UPDATE `transaction` SET `description`=?,`amount`=?,`merchant`=?,`date`=?,`category`=? where `tid`=?';
         let query2=db.query(sql2,
           [req.body.description,req.body.amount, req.body.merchant,req.body.date,req.body.category, req.params.id]
           ,(err,result)=>{
             res.status(201).send({'error':err,'result':"Transaction successfully updated !"})
+            client4 = new StatsD();
+            client4.increment('my_put_txn_counter');
         });
       }  
       else{
@@ -299,20 +335,15 @@ app.post('/transaction/:tid/attachments',(req,res)=>{
           var nameString = url; 
           
           if(process.env.NODE_ENV === "Prod"){
-            console.log("In the production enviornment")
-            console.log(process.emit.key)
-            console.log(process.env.key)
-          //   let s3 = new AWS.S3({
-          //     accessKeyId: 'AKIAJJYTLMJRYPL2FK6A',
-          //     secretAccessKey: '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',
-          //     Bucket: 'csye6225-fall2018-sharmaha.me.csye6225.com',
-          // });
+            logger.info("In the production enviornment")
+            logger.info(process.emit.key)
+            logger.info(process.env.key)
           let s3 = new AWS.S3(process.env.key);
-            console.log(s3)
+            logger.info(s3)
               
               var filename = nameString.split("/").pop();
               fs.readFile(url, (err, data) => {
-                console.log(data)
+                logger.info(data)
                 if (err) throw err;
                 const params = {
                     Bucket: process.env.BUCKET, // pass your bucket name
@@ -324,32 +355,33 @@ app.post('/transaction/:tid/attachments',(req,res)=>{
                 s3.upload(params, function(s3Err, data) {
                     if (s3Err) throw s3Err                    
                     let saveUuid = uuid()
-                    console.log("Attachment ID------>" + saveUuid);
+                    logger.info("Attachment ID------>" + saveUuid);
                     let sql2="insert into `attachment` (`aid`,`url`,`tid`)values('"+saveUuid+"','"+data.Location+"','"+req.params.tid+"')";
                     let query2=db.query(sql2,(err,result)=>{
                     res.status(201).send({'error':err,'result':"Attachment for the transaction saved successfully!"})
+                    client5 = new StatsD();
+                    client5.increment('my_post_attachment_counter');
                     });
 
                 });
              });            
-
           }
           else if(process.env.NODE_ENV === "Dev"){
 
-            console.log("In the development enviornment")
+            logger.info("In the development enviornment")
             var filename = 'save/'+ nameString.split("/").pop();
             fs.copyFile(url, filename, (err) => {
               if (err) throw err;
-              console.log('source.txt was copied to destination');            
+              logger.info('source.txt was copied to destination');            
             });        
             let saveUuid = uuid()
-            console.log("Attachment ID------>" + saveUuid);
+            logger.info("Attachment ID------>" + saveUuid);
             let sql2="insert into `attachment` (`aid`,`url`,`tid`)values('"+saveUuid+"','"+filename+"','"+req.params.tid+"')";
             let query2=db.query(sql2,(err,result)=>{
             res.status(201).send({'error':err,'result':"Attachment for the transaction saved successfully!"})
             });
           }else{
-            console.log("not in any enviornment")
+            logger.info("not in any enviornment")
           }         
 
         }
@@ -376,6 +408,8 @@ app.get('/transaction/:tid/attachments',(req,res)=>{
       let query = db.query(sql1,(err,results)=>{
         if(results.length!=0){          
           res.status(200).send({'result': results})
+          client6 = new StatsD();
+          client6.increment('my_get_attachment_counter');
       
         }else res.status(401).send({'error':'No attachments for this transaction !'}) 
       })
@@ -384,7 +418,6 @@ app.get('/transaction/:tid/attachments',(req,res)=>{
     else res.status(401).send({'error':'User not authenticated to get the attachments !'})
       
   });
-  
 });
 
 //Delete sepecific Attachment related to this transaction
@@ -394,9 +427,8 @@ app.delete('/transaction/:tid/attachments/:aid',(req,res)=>{
   let query1=db.query(sql2,(err,result)=>{
     if(result.length!=0){
 
-      if(result[0].uuid == req.headers.uuid){       
-        console.log("Tushar")     
-        console.log(process.env.NODE_ENV)
+      if(result[0].uuid == req.headers.uuid){            
+        logger.info(process.env.NODE_ENV)
         if(process.env.NODE_ENV === "Prod"){
 
             let sql1="SELECT * from `attachment` where `aid`='"+req.params.aid+"'";
@@ -418,6 +450,9 @@ app.delete('/transaction/:tid/attachments/:aid',(req,res)=>{
                       if (err) throw err;
                       
                       res.status(204).send("Attachment successfully deleted");
+                      client7 = new StatsD();
+                      client7.increment('my_delete_attachment_counter');
+                      
                       
                       
                     });
@@ -426,11 +461,11 @@ app.delete('/transaction/:tid/attachments/:aid',(req,res)=>{
                   
                 });
               }else res.status(401).send({'error':err,'result':"This specific attachment does not exist"})             
-            });            
+            });          
           }
 
             else if(process.env.NODE_ENV === "Dev"){
-                console.log("In the development enviornment")                 
+                logger.info("In the development enviornment")                 
                 let sql1="SELECT * from `attachment` where `aid`='"+req.params.aid+"'";
                 let query1=db.query(sql1,(err,result1)=>{ 
                     if(err) throw err
@@ -450,7 +485,7 @@ app.delete('/transaction/:tid/attachments/:aid',(req,res)=>{
                 }); 
                 
             }else{
-            console.log("not in any enviornment")
+            logger.info("not in any enviornment")
         }  
       
       }else res.status(401).send({'error':'User not authenticated to delete this transaction !'})   
@@ -479,8 +514,9 @@ app.put('/transaction/:tid/attachments/:aid',(req,res)=>{
                 if(process.env.NODE_ENV === "Prod"){
                     let sql1="SELECT * from `attachment` where `aid`='"+req.params.aid+"'";
                     let query1=db.query(sql1,(err,result1)=>{
-                      if(err) throw err
                       
+                      if(err) throw err
+                      var filename = result1[0].url.split("/").pop();
                       if(result1.length!=0){               
                       let s3 = new AWS.S3(process.env.key);
                         var params = {
@@ -495,7 +531,7 @@ app.put('/transaction/:tid/attachments/:aid',(req,res)=>{
                               if (err) throw err;
                               var filename = url.split("/").pop();
                               fs.readFile(url, (err, data) => {
-                                console.log(data)
+                                logger.info(data)
                                 if (err) throw err;
                                 const params = {
                                     Bucket: process.env.BUCKET, // pass your bucket name
@@ -506,11 +542,13 @@ app.put('/transaction/:tid/attachments/:aid',(req,res)=>{
                                 s3.upload(params, function(s3Err, data) {
                                     if (s3Err) throw s3Err                    
                                     let saveUuid = uuid()
-                                    console.log("Attachment ID------>" + saveUuid);
+                                    logger.info("Attachment ID------>" + saveUuid);
                                     let sql2="insert into `attachment` (`aid`,`url`,`tid`)values('"+saveUuid+"','"+data.Location+"','"+req.params.tid+"')";
                                     let query2=db.query(sql2,(err,result)=>{
                                     res.status(201).send({'error':err,'result':"New attachment for the transaction saved successfully!"})
-                                    });
+                                    client_update_attachment = new StatsD();
+                                    client_update_attachment.increment('my_update_attachment_counter'); 
+                                  });
 
                                 });
                               }); 
@@ -521,11 +559,12 @@ app.put('/transaction/:tid/attachments/:aid',(req,res)=>{
                           
                         });
                       }else res.status(401).send({'error':err,'result':"This specific attachment does not exist"})             
-                    });            
+                    });  
+                             
                   }
 
                     else if(process.env.NODE_ENV === "Dev"){
-                        console.log("In the development enviornment")                 
+                        logger.log("In the development enviornment")                 
                         let sql1="SELECT * from `attachment` where `aid`='"+req.params.aid+"'";
                         let query1=db.query(sql1,(err,result1)=>{ 
                             if(err) throw err
@@ -540,10 +579,10 @@ app.put('/transaction/:tid/attachments/:aid',(req,res)=>{
                                     var filename = 'save/'+ url.split("/").pop();
                                     fs.copyFile(url, filename, (err) => {
                                       if (err) throw err;
-                                      console.log('source.txt was copied to destination');            
+                                      logger.info('source.txt was copied to destination');            
                                     });        
                                     let saveUuid = uuid()
-                                    console.log("Attachment ID------>" + saveUuid);
+                                    logger.info("Attachment ID------>" + saveUuid);
                                     let sql2="insert into `attachment` (`aid`,`url`,`tid`)values('"+saveUuid+"','"+filename+"','"+req.params.tid+"')";
                                     let query2=db.query(sql2,(err,result)=>{
                                     res.status(201).send({'error':err,'result':"New attachment for the transaction saved successfully!"})
@@ -555,7 +594,7 @@ app.put('/transaction/:tid/attachments/:aid',(req,res)=>{
                         }); 
                         
                     }else{
-                    console.log("not in any enviornment")
+                    logger.log("not in any enviornment")
                 }  
 
               }
@@ -581,6 +620,40 @@ app.use('/login',login);
 app.listen('3000',()=>{
   console.log('Server started on 3000')
 });
+
+//user password reset
+app.get('/reset',(req,res)=>{
+  var uuid = req.headers.uuid
+
+  let sql1="select * from `user` where `uuid`='"+uuid+"'";
+      let query1=db.query(sql1,(err,result)=>{
+        
+        logger.info(result.length);
+        if(result.length!=0)
+        {
+          console.log(result)
+          console.log(result.email)
+          console.log(result[0].email)
+          var useremail = result[0].email;
+          var msg = useremail+"|"+process.env.EMAIL_SOURCE+"|"+process.env.DDB_TABLE+"|"+req.get('host');
+          logger.info("Message is --> " + msg)
+          var params = {
+            Message: msg, /* required */
+            TopicArn:process.env.TOPIC_ARN
+          };
+          var sns = new AWS.SNS();
+          sns.publish(params, function(err, data) {
+            if (err) console.log(err, err.stack); // an error occurred
+            else{
+              logger.info(data);  
+              client_reset = new StatsD();
+              client_reset.increment('my_reset_counter');      
+            }           // successful response
+          });
+        }
+      }); 
   
+});
 
 
+  
