@@ -10,6 +10,8 @@ const fs = require('fs')
 const config = require('dotenv').config()
 const AWS = require('aws-sdk')
 const winston = require('winston');
+var StatsD = require('node-statsd'),
+      client = new StatsD();
 AWS.config.update({region: 'us-east-1'});
 
 var logger = new winston.Logger({
@@ -147,6 +149,7 @@ app.get('/signup',(req,res)=>{
   else{
     res.render('signup');
   }
+  client.increment('my_signup_counter');
 });
 app.post('/signup',(req,res)=>{
   if(req.session.username)
@@ -172,7 +175,7 @@ app.post('/signup',(req,res)=>{
         if(result.length!=0)
         {
           flag=true;
-          logger.log(flag+'--userexist'+err+'|'+result);
+          logger.info(flag+'--userexist'+err+'|'+result);
           req.flash('danger','User already exist!');
           res.redirect('/signup');
           return null;
@@ -188,7 +191,7 @@ app.post('/signup',(req,res)=>{
           };
           var h=bcrypt.hashSync(req.body.pass,5);
           let saveuuid = uuid();
-          logger.log("User ID------>" + saveuuid);
+          logger.info("User ID------>" + saveuuid);
           let sql2="insert into `user` (`uuid`,`username`,`password`)values('"+saveuuid+"','"+req.body.username+"','"+h+"')";
           let query2=db.query(sql2,(err,result)=>{                       
             if(result==='undefined')
