@@ -616,7 +616,7 @@ app.listen('3000',()=>{
 app.get('/reset',(req,res)=>{
   var uuid = req.headers.uuid
 
-  let sql1="select uuid from `user` where `uuid`='"+uuid+"'";
+  let sql1="select * from `user` where `uuid`='"+uuid+"'";
       let query1=db.query(sql1,(err,result)=>{
         
         logger.info(result.length);
