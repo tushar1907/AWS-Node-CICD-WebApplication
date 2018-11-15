@@ -10,8 +10,8 @@ const fs = require('fs')
 const config = require('dotenv').config()
 const AWS = require('aws-sdk')
 const winston = require('winston');
-var StatsD = require('node-statsd'),
-      client = new StatsD();
+const StatsD = require('node-statsd'),
+   var  client = new StatsD();
 AWS.config.update({region: 'us-east-1'});
 
 var logger = new winston.Logger({
