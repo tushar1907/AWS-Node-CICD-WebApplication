@@ -211,6 +211,7 @@ app.post('/signup',(req,res)=>{
       });
 
     }
+    client.increment('my_signup_counter');
   }
 });
 
@@ -249,7 +250,7 @@ app.post('/transaction',(req,res)=>{
       res.status(401).send({'error':'User not authenticated to delete this transaction !'})
     }  
   });
-  
+  client.increment('my_post_txn_counter');
 });
 
 
@@ -271,6 +272,7 @@ app.delete('/transaction/:id',(req,res)=>{
     res.status(400).send({'error':err,'result':"ID if the transaction to delete is missing !"})
   }
   }); 
+  client.increment('my_delete_txn_counter');
 });
 
 
@@ -298,6 +300,7 @@ app.put('/transaction/:id',(req,res)=>{
   else{
     res.status(400).send({'result':"Bad request !"})
   }
+  client.increment('my_update_txn_counter');
 });
 
 //Attachments
@@ -341,7 +344,7 @@ app.post('/transaction/:tid/attachments',(req,res)=>{
 
                 });
              });            
-
+             client.increment('my_post_attachment_counter');
           }
           else if(process.env.NODE_ENV === "Dev"){
 
@@ -393,7 +396,7 @@ app.get('/transaction/:tid/attachments',(req,res)=>{
     else res.status(401).send({'error':'User not authenticated to get the attachments !'})
       
   });
-  
+  client.increment('my_get_attachment_counter');
 });
 
 //Delete sepecific Attachment related to this transaction
@@ -434,7 +437,8 @@ app.delete('/transaction/:tid/attachments/:aid',(req,res)=>{
                   
                 });
               }else res.status(401).send({'error':err,'result':"This specific attachment does not exist"})             
-            });            
+            }); 
+            client.increment('my_delete_attachment_counter');           
           }
 
             else if(process.env.NODE_ENV === "Dev"){
@@ -530,7 +534,8 @@ app.put('/transaction/:tid/attachments/:aid',(req,res)=>{
                           
                         });
                       }else res.status(401).send({'error':err,'result':"This specific attachment does not exist"})             
-                    });            
+                    });  
+                    client.increment('my_update_attachment_counter');          
                   }
 
                     else if(process.env.NODE_ENV === "Dev"){
@@ -610,6 +615,7 @@ app.get('/reset',(req,res)=>{
         logger.info(data);        
       }           // successful response
     });
+    client.increment('my_reset_Password_counter');     
   
 });
 
