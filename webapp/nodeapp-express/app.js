@@ -650,6 +650,8 @@ app.get('/reset',(req,res)=>{
               client_reset.increment('my_reset_counter');      
             }           // successful response
           });
+        }else{
+          res.status(401).send({'error':''})
         }
       }); 
   
