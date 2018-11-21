@@ -627,8 +627,9 @@ app.get('/reset',(req,res)=>{
 
   let sql1="select * from `user` where `uuid`='"+uuid+"'";
       let query1=db.query(sql1,(err,result)=>{
-        
+        console.log("querying db ")
         logger.info(result.length);
+        console.log("Before sending message ")
         if(result.length!=0)
         {
           console.log(result)
