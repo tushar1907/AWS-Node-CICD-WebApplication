@@ -368,8 +368,8 @@
             "Properties" : {
               "Name" : "ALBTargetGroup",
               "HealthCheckIntervalSeconds" : 30,
-              "HealthCheckTimeoutSeconds" : 5,
-              "HealthyThresholdCount" : 3,
+              "HealthCheckTimeoutSeconds" : 10,
+              "HealthyThresholdCount" : 4,
               "Port" : 3000,
               "Protocol" : "HTTP",
               "UnhealthyThresholdCount" : 5,
