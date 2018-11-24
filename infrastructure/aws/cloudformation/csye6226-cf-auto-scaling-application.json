@@ -234,9 +234,8 @@
                         ]
                     ]
                 }
+              }
             }
-            },
-            "DependsOn" : "RDSDB"
           },
           "RDSDB" :   {
             "Type" : "AWS::RDS::DBInstance",
