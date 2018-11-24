@@ -5,6 +5,7 @@ stackname=$1
 netstack=$2
 #s3domain=$3
 
+
 sid=$(aws cloudformation describe-stacks --stack-name $netstack --query Stacks[0].StackId --output text)
 echo "Stack Id: $sid"
 vpc=$(aws ec2 describe-vpcs --filter "Name=tag:aws:cloudformation:stack-id,Values=$sid" --query Vpcs[0].VpcId --output text)
