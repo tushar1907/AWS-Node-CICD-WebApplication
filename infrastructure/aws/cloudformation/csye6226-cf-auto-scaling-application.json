@@ -124,6 +124,7 @@
                             "yum install ruby -y \n",
                             "yum install wget -y \n",
                             "yum install python -y \n",
+                            "exec > >(tee /var/log/user-data.log|logger -t user-data -s 2>/dev/console) 2>&1 \n",
                             "yum install unzip -y \n",
                             "curl --silent --location https://rpm.nodesource.com/setup_9.x | sudo bash - \n",
                             "yum install -y nodejs \n",
