@@ -1,0 +1,112 @@
+"yum install java-1.8.0-openjdk -y\n",
+                            "yum install ruby -y \n",
+                            "yum install wget -y \n",
+                            "yum install python -y \n",
+                            "exec > >(tee /var/log/user-data.log|logger -t user-data -s 2>/dev/console) 2>&1 \n",
+                            "yum install unzip -y \n",
+                            "curl --silent --location https://rpm.nodesource.com/setup_9.x | sudo bash - \n",
+                            "yum install -y nodejs \n",
+                            "yum groupinstall 'Development Tools' -y \n",
+                            "npm install pm2 -g \n",  
+                            "yum update -y \n",
+                            "wget https://aws-codedeploy-us-east-1.s3.amazonaws.com/latest/install \n",
+                            "chmod +x ./install \n",
+                            "./install auto \n",
+                            "service codedeploy-agent start \n",
+                            "service codedeploy-agent status \n",
+                            "echo NODE_ENV=Prod > /var/.env \n",
+                            "echo DB_USER=csye6225master >> /var/.env \n",
+                            "echo DB_PASS=csye6225password >> /var/.env \n",
+                            "echo DB_PORT=3306 >> /var/.env \n",
+                            "echo DB_NAME=csye6225 >> /var/.env \n",
+                            {
+                                "Fn::Join": [
+                                    "",
+                                    [
+                                        "echo TOPIC_ARN=",
+                                        {"Ref": "snsTopicArn"},
+                                        " >> /var/.env \n"
+                                    ]
+                                ]
+                            },
+                            {
+                              "Fn::Join": [
+                                  "",
+                                  [
+                                      "echo DB_HOST=",
+                                      {
+                                          "Fn::GetAtt": [
+                                              "RDSDB",
+                                              "Endpoint.Address"
+                                          ]
+                                      },
+                                      " >> /var/.env \n"
+                                  ]
+                              ]
+                          },
+                            {
+                                "Fn::Join": [
+                                    "",
+                                    [
+                                        "echo EMAIL_SOURCE=noreply@",
+                                        {"Ref" : "domainname"},
+                                        " >> /var/.env \n"
+                                    ]
+                                ]
+                            },
+                            {
+                                "Fn::Join": [
+                                    "",
+                                    [
+                                        "echo DDB_TABLE=",
+                                        {"Ref" : "stackname"},
+                                        "-csye6225-dynamodb-table",
+                                        " >> /var/.env \n"
+                                    ]
+                                ]
+                            },
+                            {
+                                "Fn::Join": [
+                                    "",
+                                    [
+                                        "echo BUCKET=",
+                                        {"Ref" : "s3domain"},
+                                        " >> /var/.env \n"
+                                    ]
+                                ]
+                            },
+                            
+                            "echo [general] > /var/awslogs.conf \n",
+                            "echo state_file = /var/awslogs/state/agent-state >> /var/awslogs.conf \n",
+                            "echo [/var/log/messages] >> /var/awslogs.conf \n",
+                            "echo file = /var/log/customlog.log >> /var/awslogs.conf \n",
+                            "echo log_group_name = csye6225_fall2018  >> /var/awslogs.conf \n",
+                            "echo log_stream_name = webapp >> /var/awslogs.conf \n",
+                            "echo datetime_format = %b %d %H:%M:%S >> /var/awslogs.conf \n",
+                            "wget https://s3.amazonaws.com/aws-cloudwatch/downloads/latest/awslogs-agent-setup.py \n",
+                            "python awslogs-agent-setup.py -n -r us-east-1 -c /var/awslogs.conf\n",
+                            "echo [Unit] > /var/awslogs.service \n",
+                            "echo Description=CloudWatch Logs agent >> /var/awslogs.service \n",
+                            "echo After=rc-local.service >> /var/awslogs.service \n",
+                            "echo [Service] >> /var/awslogs.service \n",
+                            "echo Type=simple >> /var/awslogs.service \n",
+                            "echo Restart=always >> /var/awslogs.service \n",
+                            "echo KillMode=process >> /var/awslogs.service \n",
+                            "echo TimeoutSec=infinity >> /var/awslogs.service \n",
+                            "echo ExecStart=/var/awslogs/bin/awslogs-agent-launcher.sh --start --background --user awslogs --chuid awslogs '&' >> /var/awslogs.service \n",
+                            "echo [Install] >> /var/awslogs.service \n",
+                            "echo WantedBy=multi-user.target >> /var/awslogs.service \n",
+                            "mv /var/awslogs.service /etc/systemd/system \n",
+                            "echo --Custom Log File-- > /var/log/customlog.log \n",
+                            "chmod 777 /var/log/customlog.log \n",
+                            "systemctl enable awslogs.service \n",
+                            "systemctl start awslogs.service \n",
+                            "echo '{\"agent\": {\"metrics_collection_interval\": 10,\"logfile\": \"/var/logs/amazon-cloudwatch-agent.log\"},' > /opt/cloudwatch-config.json \n",
+                            "echo '\"logs\": {\"logs_collected\": {\"files\": {\"collect_list\": [{\"file_path\": \"/var/log/customlog.log\",\"log_group_name\": \"csye6225_fall2018\",\"log_stream_name\": \"webapp\"}]}},' >> /opt/cloudwatch-config.json \n",
+                            "echo '\"log_stream_name\": \"cloudwatch_log_stream\"},' >> /opt/cloudwatch-config.json \n",
+                            "echo '\"metrics\":{\"metrics_collected\":{' >> /opt/cloudwatch-config.json \n",
+                            "echo '\"statsd\":{' >> /opt/cloudwatch-config.json \n",    
+                            "echo '\"service_address\":\":8125\",\"metrics_collection_interval\":10,\"metrics_aggregation_interval\":0}}}}' >> /opt/cloudwatch-config.json \n",
+                            "wget https://s3.amazonaws.com/amazoncloudwatch-agent/centos/amd64/latest/amazon-cloudwatch-agent.rpm \n",
+                            "sudo rpm -U ./amazon-cloudwatch-agent.rpm \n",
+                            "sudo /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a fetch-config -m ec2 -c file:/opt/cloudwatch-config.json -s \n"
