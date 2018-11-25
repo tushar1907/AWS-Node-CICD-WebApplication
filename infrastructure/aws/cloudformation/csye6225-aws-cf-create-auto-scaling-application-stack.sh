@@ -31,7 +31,7 @@ s3domain="$trimdomain.csye6225.com"
 echo "S3 Bucket: $s3domain"
 snstopic=$(aws sns list-topics --query Topics[0] --output text)
 echo "SNS Topic arn is" $snstopic
-SSLArn=$(aws acm list-certificates --query "CertificateSummaryList[?DomainName=='$trimdomain'].CertificateArn" --output text)
+SSLArn=$(aws acm list-certificates --query "CertificateSummaryList[?DomainName=='www.$trimdomain'].CertificateArn" --output text)
 echo "SSLArn: $SSLArn"
 appname="csye6225CodeDeployApplication"
 echo "appname: $appname"
@@ -39,7 +39,7 @@ depname="csye6225CodeDeployApplication-depgroup"
 echo "depname: $depname"
 codeployRole=$(aws iam get-role --role-name CodeDeployServiceRole --query Role.Arn --output text)
 echo "CodeDeployServiceRole: $codeployRole"
-createOutput=$(aws cloudformation create-stack --stack-name $stackname --template-body file://csye6226-cf-auto-scaling-application.json --parameters ParameterKey=stackname,ParameterValue=$stackname ParameterKey=dbsubnet,ParameterValue=$dbsubnet ParameterKey=s3domain,ParameterValue=$s3domain ParameterKey=ec2Subnet1,ParameterValue=$subnet1 ParameterKey=ec2Subnet2,ParameterValue=$subnet2 ParameterKey=ec2Subnet3,ParameterValue=$subnet3 ParameterKey=ec2SecurityGroup,ParameterValue=$sgec2 ParameterKey=dbSecurityGroupId,ParameterValue=$sgdb ParameterKey=iaminstance,ParameterValue=$iaminstance ParameterKey=domainname,ParameterValue=$trimdomain ParameterKey=snsTopicArn,ParameterValue=$snstopic ParameterKey=sglb,ParameterValue=$sglb ParameterKey=SSLArn,ParameterValue=$SSLArn ParameterKey=vpc,ParameterValue=$vpc ParameterKey=appname,ParameterValue=$appname ParameterKey=depname,ParameterValue=$depname ParameterKey=codeployRole,ParameterValue=$codeployRole)
+createOutput=$(aws cloudformation create-stack --stack-name $stackname --template-body file://csye6225-cf-auto-scaling-application.json --parameters ParameterKey=stackname,ParameterValue=$stackname ParameterKey=dbsubnet,ParameterValue=$dbsubnet ParameterKey=s3domain,ParameterValue=$s3domain ParameterKey=ec2Subnet1,ParameterValue=$subnet1 ParameterKey=ec2Subnet2,ParameterValue=$subnet2 ParameterKey=ec2Subnet3,ParameterValue=$subnet3 ParameterKey=ec2SecurityGroup,ParameterValue=$sgec2 ParameterKey=dbSecurityGroupId,ParameterValue=$sgdb ParameterKey=iaminstance,ParameterValue=$iaminstance ParameterKey=domainname,ParameterValue=$trimdomain ParameterKey=snsTopicArn,ParameterValue=$snstopic ParameterKey=sglb,ParameterValue=$sglb ParameterKey=SSLArn,ParameterValue=$SSLArn ParameterKey=vpc,ParameterValue=$vpc ParameterKey=appname,ParameterValue=$appname ParameterKey=depname,ParameterValue=$depname ParameterKey=codeployRole,ParameterValue=$codeployRole)
 
 if [ $? -eq 0 ]; then
 	echo "Creating stack..."
