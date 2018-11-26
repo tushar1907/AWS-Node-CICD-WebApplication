@@ -181,30 +181,12 @@
                             "sudo rpm -U ./amazon-cloudwatch-agent.rpm \n",
                             "sudo /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a fetch-config -m ec2 -c file:/opt/cloudwatch-config.json -s \n"
                         ]
-                    ]
+                    ]   
                 }
             }
           },
           
           "DependsOn" : "RDSDB"
-      },
-      "S3" : {
-      "Type" : "AWS::S3::Bucket",
-      "Properties" : {
-        "BucketName" : {"Ref" : "s3domain"}
-      }
-      },
-      "DynamoDBTable": {
-      "Type" : "AWS::DynamoDB::Table",
-      "Properties" : {
-        "AttributeDefinitions" : [ {"AttributeName" : "id", "AttributeType" : "S"}],
-        "KeySchema" : [ {"AttributeName" : "id", "KeyType" : "HASH"} ],
-        "ProvisionedThroughput" : {
-          "ReadCapacityUnits" : 5,
-          "WriteCapacityUnits" : 5
-        },
-        "TableName": {"Fn::Join" : ["",[{"Ref" : "stackname"},"-csye6225-dynamodb-table"]] }
-      }
       },
       "RDSDB" :   {
         "Type" : "AWS::RDS::DBInstance",
@@ -243,4 +225,5 @@
             }
         }
       }
+      
     }

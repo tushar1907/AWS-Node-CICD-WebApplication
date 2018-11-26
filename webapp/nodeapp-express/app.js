@@ -627,8 +627,9 @@ app.get('/reset',(req,res)=>{
 
   let sql1="select * from `user` where `uuid`='"+uuid+"'";
       let query1=db.query(sql1,(err,result)=>{
-        
+        console.log("querying db ")
         logger.info(result.length);
+        console.log("Before sending message ")
         if(result.length!=0)
         {
           console.log(result)
@@ -641,6 +642,7 @@ app.get('/reset',(req,res)=>{
             Message: msg, /* required */
             TopicArn:process.env.TOPIC_ARN
           };
+          console.log(TOPIC_ARN)
           var sns = new AWS.SNS();
           sns.publish(params, function(err, data) {
             if (err) console.log(err, err.stack); // an error occurred
@@ -656,4 +658,3 @@ app.get('/reset',(req,res)=>{
 });
 
 
-  
