@@ -555,6 +555,36 @@
           ]
         }
     },
+    "wafrBlackListIpSet": {
+      "Type": "AWS::WAFRegional::IPSet",
+      "Properties": {
+        "Name": "csye6225-IPSet_match_set",
+        "IPSetDescriptors": [
+          {
+            "Type": "IPV4",
+            "Value": "192.168.42.136/32"
+          },
+          {
+            "Type": "IPV4",
+            "Value": "192.168.42.1/32"
+          }
+        ]
+      }
+    },
+    "wafrIPSetRule" : {
+      "Type": "AWS::WAFRegional::Rule",
+      "Properties": {
+        "Name": "MyIPSetRule",
+        "MetricName" : "MyIPSetRule",
+        "Predicates": [
+          {
+            "DataId" : {  "Ref" : "wafrBlackListIpSet" },
+            "Negated" : false,
+            "Type" : "IPMatch"
+          }
+        ]
+      }      
+    },
         "wafrXSSRule":{  
           "Type":"AWS::WAFRegional::Rule",
           "Properties":{  
@@ -582,15 +612,21 @@
               "Action":{  
                 "Type":"BLOCK"
               },
-              "Priority":10,
+              "Priority":20,
               "RuleId":{"Ref":"wafrXSSRule"}
             },
             {  
               "Action":{  
                 "Type":"BLOCK"
               },
-              "Priority":20,
+              "Priority":10,
               "RuleId":{"Ref":"wafrSQLiRule"}
+            },{  
+              "Action":{  
+                "Type":"BLOCK"
+              },
+              "Priority":30,
+              "RuleId":{"Ref":"wafrIPSetRule"}
             }
           ]
         }
