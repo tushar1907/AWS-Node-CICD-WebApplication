@@ -102,7 +102,7 @@
               "ImageId" : "ami-9887c6e7",
               "SecurityGroups" : [ { "Ref" : "ec2SecurityGroup" } ],
               "InstanceType" : "t2.micro",
-              "AssociatePublicIpAddress": false,
+              "AssociatePublicIpAddress": true,
               "IamInstanceProfile": {"Ref":"iaminstance"},
               "BlockDeviceMappings" : [
                 {
@@ -119,31 +119,116 @@
                         "",
                         [
                             "#!/bin/bash -xe \n",
-                            "echo NODE_ENV=Prod > /var/env.txt"                            
+                            "sudo yum update -y \n",
+                            "sudo yum install java-1.8.0-openjdk -y \n",
+                            "sudo yum install ruby -y \n",
+                            "sudo yum install wget -y \n",
+                            "sudo yum install python -y \n",
+                            "sudo yum install unzip -y \n",
+                            "sudo curl --silent --location https://rpm.nodesource.com/setup_9.x | sudo bash - \n",
+                            "sudo yum install -y nodejs \n",
+                            "sudo yum groupinstall 'Development Tools' -y \n",
+                            "sudo npm install pm2 -g \n",  
+                            "sudo yum update -y \n",
+                            "sudo wget https://aws-codedeploy-us-east-1.s3.amazonaws.com/latest/install \n",
+                            "sudo chmod +x ./install \n",
+                            "sudo ./install auto \n",
+                            "sudo service codedeploy-agent start \n",
+                            "sudo service codedeploy-agent status \n",
+                            "sudo echo NODE_ENV=Prod > /var/.env \n",
+                            "sudo echo DB_USER=csye6225master >> /var/.env \n",
+                            "sudo echo DB_PASS=csye6225password >> /var/.env \n",
+                            "sudo echo DB_PORT=3306 >> /var/.env \n",
+                            "sudo echo DB_NAME=csye6225 >> /var/.env \n",
+                            {
+                                "Fn::Join": [
+                                    "",
+                                    [
+                                        "sudo echo TOPIC_ARN=",
+                                        {"Ref": "snsTopicArn"},
+                                        " >> /var/.env \n"
+                                    ]
+                                ]
+                            },
+                        
+                            {
+                                "Fn::Join": [
+                                    "",
+                                    [
+                                        "sudo echo EMAIL_SOURCE=noreply@",
+                                        {"Ref" : "domainname"},
+                                        " >> /var/.env \n"
+                                    ]
+                                ]
+                            },
+                            {
+                              "Fn::Join": [
+                                  "",
+                                  [
+                                      "echo DB_HOST=",
+                                      {
+                                          "Fn::GetAtt": [
+                                              "RDSDB",
+                                              "Endpoint.Address"
+                                          ]
+                                      },
+                                      " >> /var/.env \n"
+                                  ]
+                              ]
+                          },
+                            {
+                                "Fn::Join": [
+                                    "",
+                                    [
+                                        "sudo echo BUCKET=",
+                                        {"Ref" : "s3domain"},
+                                        " >> /var/.env \n"
+                                    ]
+                                ]
+                            },                           
+                            "sudo echo [general] > /var/awslogs.conf \n",
+                            "sudo echo state_file = /var/awslogs/state/agent-state >> /var/awslogs.conf \n",
+                            "sudo echo [/var/log/messages] >> /var/awslogs.conf \n",
+                            "sudo echo file = /var/log/customlog.log >> /var/awslogs.conf \n",
+                            "sudo echo log_group_name = csye6225_fall2018  >> /var/awslogs.conf \n",
+                            "sudo echo log_stream_name = webapp >> /var/awslogs.conf \n",
+                            "sudo echo datetime_format = %b %d %H:%M:%S >> /var/awslogs.conf \n",
+                            "sudo wget https://s3.amazonaws.com/aws-cloudwatch/downloads/latest/awslogs-agent-setup.py \n",
+                            "sudo python awslogs-agent-setup.py -n -r us-east-1 -c /var/awslogs.conf\n",
+                            "sudo echo [Unit] > /var/awslogs.service \n",
+                            "sudo echo Description=CloudWatch Logs agent >> /var/awslogs.service \n",
+                            "sudo echo After=rc-local.service >> /var/awslogs.service \n",
+                            "sudo echo [Service] >> /var/awslogs.service \n",
+                            "sudo echo Type=simple >> /var/awslogs.service \n",
+                            "sudo echo Restart=always >> /var/awslogs.service \n",
+                            "sudo echo KillMode=process >> /var/awslogs.service \n",
+                            "sudo echo TimeoutSec=infinity >> /var/awslogs.service \n",
+                            "sudo echo ExecStart=/var/awslogs/bin/awslogs-agent-launcher.sh --start --background --user awslogs --chuid awslogs '&' >> /var/awslogs.service \n",
+                            "sudo echo [Install] >> /var/awslogs.service \n",
+                            "sudo echo WantedBy=multi-user.target >> /var/awslogs.service \n",
+                            "sudo mv /var/awslogs.service /etc/systemd/system \n",
+                            "sudo echo --Custom Log File-- > /var/log/customlog.log \n",
+                            "sudo chmod 777 /var/log/customlog.log \n",
+                            "sudo systemctl enable awslogs.service \n",
+                            "sudo systemctl start awslogs.service \n",
+                            "sudo echo '{\"agent\": {\"metrics_collection_interval\": 10,\"logfile\": \"/var/logs/amazon-cloudwatch-agent.log\"},' > /opt/cloudwatch-config.json \n",
+                            "sudo echo '\"logs\": {\"logs_collected\": {\"files\": {\"collect_list\": [{\"file_path\": \"/var/log/customlog.log\",\"log_group_name\": \"csye6225_fall2018\",\"log_stream_name\": \"webapp\"}]}},' >> /opt/cloudwatch-config.json \n",
+                            "sudo echo '\"log_stream_name\": \"cloudwatch_log_stream\"},' >> /opt/cloudwatch-config.json \n",
+                            "sudo echo '\"metrics\":{\"metrics_collected\":{' >> /opt/cloudwatch-config.json \n",
+                            "sudo echo '\"statsd\":{' >> /opt/cloudwatch-config.json \n",    
+                            "sudo echo '\"service_address\":\":8125\",\"metrics_collection_interval\":10,\"metrics_aggregation_interval\":0}}}}' >> /opt/cloudwatch-config.json \n",
+                            "sudo wget https://s3.amazonaws.com/amazoncloudwatch-agent/centos/amd64/latest/amazon-cloudwatch-agent.rpm \n",
+                            "sudo rpm -U ./amazon-cloudwatch-agent.rpm \n",
+                            "sudo /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a fetch-config -m ec2 -c file:/opt/cloudwatch-config.json -s \n"
                         ]
                     ]
                 }
               }
             }
+            }
+            ,     
+            "DependsOn" : "RDSDB"
           },
-          "RDSDB" :   {
-            "Type" : "AWS::RDS::DBInstance",
-            "Properties" :
-              {
-                "AllocatedStorage" : "5",
-                "DBInstanceClass" : "db.t2.medium",
-                "DBInstanceIdentifier" : {"Fn::Join" : ["",[{"Ref" : "stackname"},"-csye6225-RDS-DB"]] },
-                "DBName" : "csye6225",
-                "DBSubnetGroupName" :{"Ref" : "dbsubnet"},
-                "Engine" : "mysql",
-                "EngineVersion" : "5.6.37",
-                "MasterUsername" : "csye6225master",
-                "MasterUserPassword" : "csye6225password",
-                "MultiAZ" : "false",
-                "PubliclyAccessible" : "false",
-                "VPCSecurityGroups": [{"Ref": "dbSecurityGroupId"}]
-              }
-          },                
           "WebServerScaleUpPolicy": {
             "Type": "AWS::AutoScaling::ScalingPolicy",
             "Properties": {
@@ -274,6 +359,24 @@
         "BucketName" : {"Ref" : "s3domain"}
       }
       },
+      "RDSDB" :   {
+        "Type" : "AWS::RDS::DBInstance",
+        "Properties" :
+          {
+            "AllocatedStorage" : "5",
+            "DBInstanceClass" : "db.t2.medium",
+            "DBInstanceIdentifier" : {"Fn::Join" : ["",[{"Ref" : "stackname"},"-csye6225-RDS-DB"]] },
+            "DBName" : "csye6225",
+            "DBSubnetGroupName" :{"Ref" : "dbsubnet"},
+            "Engine" : "mysql",
+            "EngineVersion" : "5.6.37",
+            "MasterUsername" : "csye6225master",
+            "MasterUserPassword" : "csye6225password",
+            "MultiAZ" : "false",
+            "PubliclyAccessible" : "false",
+            "VPCSecurityGroups": [{"Ref": "dbSecurityGroupId"}]
+          }
+      },  
       "DynamoDBTable": {
       "Type" : "AWS::DynamoDB::Table",
       "Properties" : {
