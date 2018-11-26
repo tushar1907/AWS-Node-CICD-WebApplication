@@ -1,79 +1,8 @@
-{
-    "Description" : "Application Stack",
-    "AWSTemplateFormatVersion" : "2010-09-09",
-    
-    "Parameters" : {
-      "stackname" : {
-        "Description" : "Stack Name",
-        "Type" : "String",
-        "Default" : "stack01"
-      },
-      "dbsubnet" : {
-        "Description" : "DB Subnet Group name",
-        "Type" : "String"
-      },
-      "s3domain" : {
-        "Description" : "S3 name",
-        "Type" : "String"
-      },
-      "ec2Subnet" : {
-        "Description" : "Subnet ID for EC2",
-        "Type" : "String"
-      },
-      "ec2SecurityGroup" : {
-        "Description" : "Resource ID for EC2 Security Group",
-        "Type" : "String"
-      },
-      "dbSecurityGroupId" : {
-        "Description" : "Resource ID for DB Security Group",
-        "Type" : "String"
-      },
-      "iaminstance" : {
-        "Description" : "Instance Profile Name for CodeDeploy to S3",
-        "Type" : "String"
-      },
-      "domainname" : {
-        "Description" : "Domain Name",
-        "Type" : "String"
-      },
-      "snsTopicArn" : {
-        "Description" : "SNS Topic ARN",
-        "Type" : "String"
-      }
-    },
-    "Resources": {
-      "EC2Instance": {
-        "Type": "AWS::EC2::Instance",
-        "Properties": {
-            "ImageId": "ami-9887c6e7",
-            "InstanceType": "t2.micro",
-            "DisableApiTermination": "False",
-            "SecurityGroupIds": [{"Ref" : "ec2SecurityGroup"}],
-            "KeyName": "csye6225keypair",
-            "SubnetId": {"Ref": "ec2Subnet"},
-            "Tenancy": "default",
-            "IamInstanceProfile": {"Ref":"iaminstance"},
-            "Tags": [{"Key" : "Name", "Value" : "MyEC2Instance"}],
-            "BlockDeviceMappings" : [
-            {
-              "DeviceName" : "/dev/sda1",
-              "Ebs" : {
-                        "DeleteOnTermination": true,
-                        "VolumeSize": 16,
-                        "VolumeType": "gp2"
-                      }
-            }],
-            "UserData": {
-                "Fn::Base64": {
-                    "Fn::Join": [
-                        "",
-                        [
-                            "#!/bin/bash -xe \n",
-                            "yum update -y \n",
-                            "yum install java-1.8.0-openjdk -y\n",
+"yum install java-1.8.0-openjdk -y\n",
                             "yum install ruby -y \n",
                             "yum install wget -y \n",
                             "yum install python -y \n",
+                            "exec > >(tee /var/log/user-data.log|logger -t user-data -s 2>/dev/console) 2>&1 \n",
                             "yum install unzip -y \n",
                             "curl --silent --location https://rpm.nodesource.com/setup_9.x | sudo bash - \n",
                             "yum install -y nodejs \n",
@@ -100,6 +29,21 @@
                                     ]
                                 ]
                             },
+                            {
+                              "Fn::Join": [
+                                  "",
+                                  [
+                                      "echo DB_HOST=",
+                                      {
+                                          "Fn::GetAtt": [
+                                              "RDSDB",
+                                              "Endpoint.Address"
+                                          ]
+                                      },
+                                      " >> /var/.env \n"
+                                  ]
+                              ]
+                          },
                             {
                                 "Fn::Join": [
                                     "",
@@ -131,21 +75,7 @@
                                     ]
                                 ]
                             },
-                            {
-                                "Fn::Join": [
-                                    "",
-                                    [
-                                        "echo DB_HOST=",
-                                        {
-                                            "Fn::GetAtt": [
-                                                "RDSDB",
-                                                "Endpoint.Address"
-                                            ]
-                                        },
-                                        " >> /var/.env \n"
-                                    ]
-                                ]
-                            },
+                            
                             "echo [general] > /var/awslogs.conf \n",
                             "echo state_file = /var/awslogs/state/agent-state >> /var/awslogs.conf \n",
                             "echo [/var/log/messages] >> /var/awslogs.conf \n",
@@ -180,67 +110,3 @@
                             "wget https://s3.amazonaws.com/amazoncloudwatch-agent/centos/amd64/latest/amazon-cloudwatch-agent.rpm \n",
                             "sudo rpm -U ./amazon-cloudwatch-agent.rpm \n",
                             "sudo /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a fetch-config -m ec2 -c file:/opt/cloudwatch-config.json -s \n"
-                        ]
-                    ]   
-                }
-            }
-          },
-          
-          "DependsOn" : "RDSDB"
-      },
-      "S3" : {
-      "Type" : "AWS::S3::Bucket",
-      "Properties" : {
-        "BucketName" : {"Ref" : "s3domain"}
-      }
-      },
-      "DynamoDBTable": {
-      "Type" : "AWS::DynamoDB::Table",
-      "Properties" : {
-        "AttributeDefinitions" : [ {"AttributeName" : "id", "AttributeType" : "S"}],
-        "KeySchema" : [ {"AttributeName" : "id", "KeyType" : "HASH"} ],
-        "ProvisionedThroughput" : {
-          "ReadCapacityUnits" : 5,
-          "WriteCapacityUnits" : 5
-        },
-        "TableName": {"Fn::Join" : ["",[{"Ref" : "stackname"},"-csye6225-dynamodb-table"]] }
-      }
-      },
-      "RDSDB" :   {
-        "Type" : "AWS::RDS::DBInstance",
-        "Properties" :
-          {
-            "AllocatedStorage" : "5",
-            "DBInstanceClass" : "db.t2.medium",
-            "DBInstanceIdentifier" : {"Fn::Join" : ["",[{"Ref" : "stackname"},"-csye6225-RDS-DB"]] },
-            "DBName" : "csye6225",
-            "DBSubnetGroupName" :{"Ref" : "dbsubnet"},
-            "Engine" : "mysql",
-            "EngineVersion" : "5.6.37",
-            "MasterUsername" : "csye6225master",
-            "MasterUserPassword" : "csye6225password",
-            "MultiAZ" : "false",
-            "PubliclyAccessible" : "false",
-            "VPCSecurityGroups": [{"Ref": "dbSecurityGroupId"}]
-          }
-      }
-   
-},  
-    "Outputs": {
-        "InstanceId": {
-            "Description": "InstanceId of the newly created EC2 instance",
-            "Value": {
-                "Ref": "EC2Instance"    
-            }
-        },
-        "AZ": {
-            "Description": "Availability Zone of the newly created EC2 instance",
-            "Value": {
-                "Fn::GetAtt": [
-                    "EC2Instance",
-                    "AvailabilityZone"
-                ]
-            }
-        }
-      }
-    }
