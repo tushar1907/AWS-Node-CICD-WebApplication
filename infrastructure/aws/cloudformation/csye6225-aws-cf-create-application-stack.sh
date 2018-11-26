@@ -30,6 +30,7 @@ SSLArn=$(aws acm list-certificates --query "CertificateSummaryList[?DomainName==
 echo "SSLArn: $SSLArn"
 createOutput=$(aws cloudformation create-stack --stack-name $stackname --template-body file://csye6225-cf-application.json --parameters ParameterKey=stackname,ParameterValue=$stackname ParameterKey=dbsubnet,ParameterValue=$dbsubnet ParameterKey=s3domain,ParameterValue=$s3domain ParameterKey=ec2Subnet,ParameterValue=$subnet1 ParameterKey=ec2SecurityGroup,ParameterValue=$sgec2 ParameterKey=dbSecurityGroupId,ParameterValue=$sgdb ParameterKey=iaminstance,ParameterValue=$iaminstance ParameterKey=domainname,ParameterValue=$trimdomain ParameterKey=snsTopicArn,ParameterValue=$snstopic ParameterKey=SSLArn,ParameterValue=$SSLArn)
 
+
 if [ $? -eq 0 ]; then
 	echo "Creating stack..."
 	aws cloudformation wait stack-create-complete --stack-name $stackname
