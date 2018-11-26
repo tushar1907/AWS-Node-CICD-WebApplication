@@ -31,7 +31,7 @@ s3domain="$trimdomain.csye6225.com"
 echo "S3 Bucket: $s3domain"
 snstopic=$(aws sns list-topics --query Topics[0] --output text)
 echo "SNS Topic arn is" $snstopic
-SSLArn=$(aws acm list-certificates --query "CertificateSummaryList[?DomainName=='$trimdomain'].CertificateArn" --output text)
+SSLArn=$(aws acm list-certificates --query "CertificateSummaryList[?DomainName=='www.$trimdomain'].CertificateArn" --output text)
 echo "SSLArn: $SSLArn"
 appname="csye6225CodeDeployApplication"
 echo "appname: $appname"
