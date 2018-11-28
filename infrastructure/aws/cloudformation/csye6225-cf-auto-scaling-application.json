@@ -425,6 +425,212 @@
               "EvaluateTargetHealth": "false"
           }
         }
+      },
+      "wafrSQLiSet":{  
+        "Type":"AWS::WAFRegional::SqlInjectionMatchSet",
+        "Properties":{  
+          "Name":"csye6225-sqlinjection_match_set",
+          "SqlInjectionMatchTuples":[  
+            {  
+              "FieldToMatch":{  
+                "Type":"URI"
+              },
+              "TextTransformation":"URL_DECODE"
+            },
+            {  
+              "FieldToMatch":{  
+                "Type":"URI"
+              },
+              "TextTransformation":"HTML_ENTITY_DECODE"
+            },
+            {  
+              "FieldToMatch":{  
+                "Type":"QUERY_STRING"
+              },
+              "TextTransformation":"URL_DECODE"
+            },
+            {  
+              "FieldToMatch":{  
+                "Type":"QUERY_STRING"
+              },
+              "TextTransformation":"HTML_ENTITY_DECODE"
+            },
+            {  
+              "FieldToMatch":{  
+                "Type":"BODY"
+              },
+              "TextTransformation":"URL_DECODE"
+            },
+            {  
+              "FieldToMatch":{  
+                "Type":"BODY"
+              },
+              "TextTransformation":"HTML_ENTITY_DECODE"
+            },
+            {  
+              "FieldToMatch":{  
+                "Type":"HEADER",
+                "Data":"cookie"
+              },
+              "TextTransformation":"URL_DECODE"
+            },
+            {  
+              "FieldToMatch":{  
+                "Type":"HEADER",
+                "Data":"cookie"
+              },
+              "TextTransformation":"HTML_ENTITY_DECODE"
+            }
+          ]
+        }
+      },
+      "wafrSQLiRule":{  
+        "Type":"AWS::WAFRegional::Rule",
+        "Properties":{  
+          "MetricName":"MySqliSetRule",
+          "Name":"MySqliSetRule",
+          "Predicates":[  
+            {  
+              "Type":"SqlInjectionMatch",
+              "Negated":false,
+              "DataId":{"Ref" :"wafrSQLiSet"}
+            }
+          ]
+        }
+      },
+      "wafrXSSSet":{  
+        "Type":"AWS::WAFRegional::XssMatchSet",
+        "Properties":{  
+          "Name":"csye6225-XssSet_match_set",
+          "XssMatchTuples":[  
+            {  
+              "FieldToMatch":{  
+                "Type":"URI"
+              },
+              "TextTransformation":"URL_DECODE"
+            },
+            {  
+              "FieldToMatch":{  
+                "Type":"URI"
+              },
+              "TextTransformation":"HTML_ENTITY_DECODE"
+            },
+            {  
+              "FieldToMatch":{  
+                "Type":"QUERY_STRING"
+              },
+              "TextTransformation":"URL_DECODE"
+            },
+            {  
+              "FieldToMatch":{  
+                "Type":"QUERY_STRING"
+              },
+              "TextTransformation":"HTML_ENTITY_DECODE"
+            },
+            {  
+              "FieldToMatch":{  
+                "Type":"BODY"
+              },
+              "TextTransformation":"URL_DECODE"
+            },
+            {  
+              "FieldToMatch":{  
+                "Type":"BODY"
+              },
+              "TextTransformation":"HTML_ENTITY_DECODE"
+            },
+            {  
+              "FieldToMatch":{  
+                "Type":"HEADER",
+                "Data":"cookie"
+              },
+              "TextTransformation":"URL_DECODE"
+            },
+            {  
+              "FieldToMatch":{  
+                "Type":"HEADER",
+                "Data":"cookie"
+              },
+              "TextTransformation":"HTML_ENTITY_DECODE"
+            }
+          ]
+        }
+    },
+    "wafrBlackListIpSet": {
+      "Type": "AWS::WAFRegional::IPSet",
+      "Properties": {
+        "Name": "csye6225-IPSet_match_set",
+        "IPSetDescriptors": [
+          {
+            "Type": "IPV4",
+            "Value": "192.168.42.136/32"
+          },
+          {
+            "Type": "IPV4",
+            "Value": "192.168.42.1/32"
+          }
+        ]
+      }
+    },
+    "wafrIPSetRule" : {
+      "Type": "AWS::WAFRegional::Rule",
+      "Properties": {
+        "Name": "MyIPSetRule",
+        "MetricName" : "MyIPSetRule",
+        "Predicates": [
+          {
+            "DataId" : {  "Ref" : "wafrBlackListIpSet" },
+            "Negated" : false,
+            "Type" : "IPMatch"
+          }
+        ]
+      }      
+    },
+        "wafrXSSRule":{  
+          "Type":"AWS::WAFRegional::Rule",
+          "Properties":{  
+            "MetricName":"MyXssiSetRule",
+            "Name":"MyXssiSetRule",
+            "Predicates":[  
+              {  
+                "Type":"XssMatch",
+                "Negated":false,
+                "DataId":{"Ref":"wafrXSSSet"}
+              }
+            ]
+          }
+        },
+      "wafrOwaspACL":{  
+        "Type":"AWS::WAFRegional::WebACL",
+        "Properties":{  
+          "MetricName":"MyWebACL",
+          "Name":"MyWebACL",
+          "DefaultAction":{  
+            "Type":"ALLOW"
+          },
+          "Rules":[  
+            {  
+              "Action":{  
+                "Type":"BLOCK"
+              },
+              "Priority":20,
+              "RuleId":{"Ref":"wafrXSSRule"}
+            },
+            {  
+              "Action":{  
+                "Type":"BLOCK"
+              },
+              "Priority":10,
+              "RuleId":{"Ref":"wafrSQLiRule"}
+            },{  
+              "Action":{  
+                "Type":"BLOCK"
+              },
+              "Priority":30,
+              "RuleId":{"Ref":"wafrIPSetRule"}
+            }
+          ]
+        }
       }
     },
     "Outputs": {
