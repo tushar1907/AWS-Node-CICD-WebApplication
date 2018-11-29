@@ -245,7 +245,7 @@ app.post('/transaction',(req,res)=>{
   let merchant = req.body.merchant;
   let date = req.body.date;
   let category = req.body.category;
-  let sql1="SELECT * from `user` where `uuid`='"+req.headers.uuid+"'";
+  let sql1="SELECT * from `user` where `username`='"+req.headers.uuid+"'";
   let query1=db.query(sql1,(err,result)=>{
     logger.info("------>"+result);
     if(result.length!=0){
