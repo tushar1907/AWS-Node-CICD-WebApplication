@@ -224,9 +224,8 @@
                     ]
                 }
               }
-            }
-            
-            ,     
+            },
+                
             "DependsOn" : "RDSDB"
           },
           "WebServerScaleUpPolicy": {
@@ -631,9 +630,16 @@
             }
           ]
         }
+      },
+      "MyWebACLAssociation": {
+        "Type": "AWS::WAFRegional::WebACLAssociation",
+        "Properties": {
+          "ResourceArn": { "Ref": "ApplicationLoadBalancer" },
+          "WebACLId": { "Ref": "wafrOwaspACL" }
+        }
       }
     },
-    
+  
     "Outputs": {
       "URL" : {
         "Description" : "The URL of the website",
