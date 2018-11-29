@@ -86,7 +86,7 @@
               "MinSize" : "3",
               "MaxSize" : "10",
               "DesiredCapacity":"3",
-              "Cooldown":"60",   
+              "Cooldown":"60",
               "Tags" : [ {
                 "Key" : "Name",
                 "Value" : "MyEC2Instance",
@@ -224,8 +224,9 @@
                     ]
                 }
               }
-            },
-                
+            }
+            }
+            ,     
             "DependsOn" : "RDSDB"
           },
           "WebServerScaleUpPolicy": {
@@ -259,7 +260,7 @@
               "Statistic": "Average",
               "Period": "300",
               "EvaluationPeriods": "2",
-              "Threshold": "75",
+              "Threshold": "10",
               "AlarmActions": [
                 {
                   "Ref": "WebServerScaleUpPolicy"
@@ -285,7 +286,7 @@
               "Statistic": "Average",
               "Period": "300",
               "EvaluationPeriods": "2",
-              "Threshold": "90",
+              "Threshold": "8",
               "AlarmActions": [
                 {
                   "Ref": "WebServerScaleDownPolicy"
@@ -370,7 +371,7 @@
             "Engine" : "mysql",
             "EngineVersion" : "5.6.37",
             "MasterUsername" : "csye6225master",
-            "MasterUserPassword" : "  ",
+            "MasterUserPassword" : "csye6225password",
             "MultiAZ" : "false",
             "PubliclyAccessible" : "false",
             "VPCSecurityGroups": [{"Ref": "dbSecurityGroupId"}]
@@ -631,15 +632,7 @@
           ]
         }
       },
-      "MyWebACLAssociation": {
-        "Type": "AWS::WAFRegional::WebACLAssociation",
-        "Properties": {
-          "ResourceArn": { "Ref": "ApplicationLoadBalancer" },
-          "WebACLId": { "Ref": "wafrOwaspACL" }
-        }
-      }
-    },
-  
+    
     "Outputs": {
       "URL" : {
         "Description" : "The URL of the website",
