@@ -165,6 +165,17 @@
                               "Fn::Join": [
                                   "",
                                   [
+                                      "echo DDB_TABLE=",
+                                      {"Ref" : "stackname"},
+                                      "-csye6225-dynamodb-table",
+                                      " >> /var/.env \n"
+                                  ]
+                              ]
+                            },
+                            {
+                              "Fn::Join": [
+                                  "",
+                                  [
                                       "echo DB_HOST=",
                                       {
                                           "Fn::GetAtt": [
