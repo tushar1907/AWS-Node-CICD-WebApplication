@@ -638,8 +638,7 @@ app.get('/reset',(req,res)=>{
           console.log(result[0].email)
           var useremail = result[0].email;
           var msg = useremail+"|"+process.env.EMAIL_SOURCE+"|"+process.env.DDB_TABLE+"|"+req.get('host');
-          logger.info("Message is --> " + msg)
-          console.log(TOPIC_ARN)
+          logger.info("Message is --> " + msg)          
           var params = {
             Message: msg, /* required */
             TopicArn:process.env.TOPIC_ARN
