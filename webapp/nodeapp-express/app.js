@@ -252,6 +252,7 @@ app.post('/transaction',(req,res)=>{
       if(description && amount && merchant && date && category){
         let saveUuid = uuid()
         logger.info("Transaction ID------>" + saveUuid);
+        console.log("Transaction ID------>" + saveUuid);
         client2 = new StatsD();
         client2.increment('my_post_txn_counter');
         let sql2="insert into `transaction` (`tid`,`description`,`amount`,`merchant`,`date`,`category`,`uuid`)values('"+saveUuid+"','"+description+"','"+amount+"','"+merchant+"','"+date+"','"+category+"','"+req.headers.uuid+"')";
