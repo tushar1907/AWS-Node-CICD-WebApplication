@@ -272,7 +272,6 @@ app.post('/transaction',(req,res)=>{
   });
 });
 
-
 app.delete('/transaction/:id',(req,res)=>{
   let sql1="SELECT * from `transaction` where `tid`='"+req.params.id+"'";
   let query1=db.query(sql1,(err,result)=>{
