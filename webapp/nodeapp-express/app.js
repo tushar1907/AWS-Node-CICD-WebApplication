@@ -161,7 +161,7 @@ app.post('/signup',(req,res)=>{
     res.redirect('/dashboard');
   }
   else{
-    req.checkBody('username','Please enter Username!').notEmpty();
+    req.checkBody('username','Please enter Username!').notEmpty();console.log
     req.checkBody('pass','Please enter Password!').notEmpty();
     var errors=req.validationErrors();
     if(errors){
@@ -195,6 +195,7 @@ app.post('/signup',(req,res)=>{
           var h=bcrypt.hashSync(req.body.pass,5);
           let saveuuid = uuid();
           logger.info("User ID------>" + saveuuid);
+          console.log("User ID------>" + saveuuids)
           let sql2="insert into `user` (`uuid`,`username`,`password`,`email`)values('"+saveuuid+"','"+req.body.username+"','"+h+"','"+req.body.email+"')";
           let query2=db.query(sql2,(err,result)=>{                       
             if(result==='undefined')
@@ -252,6 +253,7 @@ app.post('/transaction',(req,res)=>{
       if(description && amount && merchant && date && category){
         let saveUuid = uuid()
         logger.info("Transaction ID------>" + saveUuid);
+        console.log("Transaction ID------>" + saveUuid);
         client2 = new StatsD();
         client2.increment('my_post_txn_counter');
         let sql2="insert into `transaction` (`tid`,`description`,`amount`,`merchant`,`date`,`category`,`uuid`)values('"+saveUuid+"','"+description+"','"+amount+"','"+merchant+"','"+date+"','"+category+"','"+req.headers.uuid+"')";
@@ -357,6 +359,7 @@ app.post('/transaction/:tid/attachments',(req,res)=>{
                     if (s3Err) throw s3Err                    
                     let saveUuid = uuid()
                     logger.info("Attachment ID------>" + saveUuid);
+                    console.log("Attachment ID------>" + saveUuid);
                     let sql2="insert into `attachment` (`aid`,`url`,`tid`)values('"+saveUuid+"','"+data.Location+"','"+req.params.tid+"')";
                     let query2=db.query(sql2,(err,result)=>{
                     res.status(201).send({'error':err,'result':"Attachment for the transaction saved successfully!"})
@@ -377,6 +380,7 @@ app.post('/transaction/:tid/attachments',(req,res)=>{
             });        
             let saveUuid = uuid()
             logger.info("Attachment ID------>" + saveUuid);
+            console.log("Attachment ID------>" + saveUuid);
             let sql2="insert into `attachment` (`aid`,`url`,`tid`)values('"+saveUuid+"','"+filename+"','"+req.params.tid+"')";
             let query2=db.query(sql2,(err,result)=>{
             res.status(201).send({'error':err,'result':"Attachment for the transaction saved successfully!"})
