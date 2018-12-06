@@ -370,7 +370,7 @@
             "Engine" : "mysql",
             "EngineVersion" : "5.6.37",
             "MasterUsername" : "csye6225master",
-            "MasterUserPassword" : "  ",
+            "MasterUserPassword" : "csye6225password",
             "MultiAZ" : "false",
             "PubliclyAccessible" : "false",
             "VPCSecurityGroups": [{"Ref": "dbSecurityGroupId"}]
